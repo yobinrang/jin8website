@@ -1,0 +1,1869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jin 8 — Shanxi Cocktail Bar · Box Hill</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Cormorant+SC:wght@300;400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Noto+Serif+SC:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --crimson: #8B0000;
+      --crimson-deep: #4a0202;
+      --crimson-oxblood: #2c0808;
+      --crimson-light: #A50000;
+      --cream: #FAF0C8;
+      --cream-dark: #F0E4A8;
+      --cream-muted: #E8D898;
+      --ink: #160606;
+      --gold: #C9A961;
+      --gold-tarnished: #8a7340;
+      --jade: #4a6b5c;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--crimson);
+      color: var(--cream);
+      font-family: 'EB Garamond', serif;
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.05;
+      pointer-events: none;
+      z-index: 999;
+      mix-blend-mode: overlay;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 48px;
+      transition: background 0.4s, padding 0.4s, backdrop-filter 0.4s;
+    }
+
+    nav.scrolled {
+      background: rgba(30, 6, 6, 0.82);
+      backdrop-filter: blur(14px);
+      padding: 14px 48px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+    }
+
+    .nav-seal {
+      width: 38px;
+      height: 52px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nav-seal img { width: 100%; height: 100%; object-fit: contain; visibility: hidden; }
+    .nav-seal::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: url('assets/gold-texture.png');
+      background-size: 100% 200%;
+      background-position: center 35%;
+      -webkit-mask: url('assets/jin8-logo-cropped.png') center/contain no-repeat;
+      mask: url('assets/jin8-logo-cropped.png') center/contain no-repeat;
+    }
+
+    .nav-wordmark {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      color: var(--cream);
+    }
+
+    .nav-wordmark em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 40px;
+      list-style: none;
+      align-items: center;
+    }
+
+    .nav-links a {
+      font-family: 'Cormorant SC', serif;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--cream);
+      text-decoration: none;
+      opacity: 0.72;
+      transition: opacity 0.25s, color 0.25s;
+      position: relative;
+      padding-bottom: 3px;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 1px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .nav-links a:hover { opacity: 1; }
+    .nav-links a:hover::after { transform: scaleX(1); }
+
+    .nav-cta {
+      font-family: 'Cormorant SC', serif;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      padding: 10px 22px;
+      border: 1px solid rgba(250, 240, 200, 0.35);
+      border-radius: 2px;
+      background: transparent;
+      color: var(--cream);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .nav-cta:hover {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: var(--ink);
+    }
+
+    /* ── SEAL (the "晋 8" mark — original) ── */
+    .seal {
+      position: relative;
+      display: inline-block;
+    }
+
+    .seal svg { display: block; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      text-align: center;
+      padding: 140px 40px 100px;
+      overflow: hidden;
+      background: #1a0303;
+    }
+
+    .hero-photo {
+      position: absolute;
+      inset: 0;
+      background-image: url('assets/ref-temple-dusk.jpeg');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.42;
+      filter: saturate(1.1) contrast(1.05);
+      animation: photoIn 2.4s 0.1s cubic-bezier(0.16,1,0.3,1) both, kenBurns 40s ease-in-out infinite alternate;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 35%, rgba(139, 0, 0, 0.45) 0%, transparent 65%),
+        linear-gradient(180deg, rgba(74, 2, 2, 0.55) 0%, rgba(40, 6, 6, 0.45) 50%, rgba(15, 3, 3, 0.85) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 30%, rgba(20,0,0,0.7) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-seal {
+      position: relative;
+      display: inline-block;
+      width: 200px;
+      margin: 0 auto 36px;
+      animation: fadeUp 1.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+      filter: drop-shadow(0 0 32px rgba(255, 200, 100, 0.35)) drop-shadow(0 10px 40px rgba(0,0,0,0.5));
+    }
+
+    .hero-seal img {
+      width: 200px;
+      height: auto;
+      display: block;
+      visibility: hidden;
+    }
+
+    .hero-seal::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: url('assets/gold-texture.png');
+      background-size: 100% 200%;
+      background-position: center 35%;
+      -webkit-mask: url('assets/jin8-logo-cropped.png') center/contain no-repeat;
+      mask: url('assets/jin8-logo-cropped.png') center/contain no-repeat;
+      animation: shimmer 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: center 25%; }
+      100% { background-position: center 65%; }
+    }
+
+    .hero-kicker {
+      font-family: 'Cormorant SC', serif;
+      font-size: clamp(11px, 1.2vw, 13px);
+      font-weight: 300;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.9;
+      animation: fadeUp 1.4s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+      margin-bottom: 18px;
+    }
+
+    .hero-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(48px, 8vw, 100px);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      font-weight: 300;
+      line-height: 0.92;
+      letter-spacing: -0.015em;
+      color: var(--cream);
+      animation: fadeUp 1.4s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .hero-name em {
+      font-style: italic;
+      font-weight: 300;
+      color: var(--gold);
+    }
+
+    .hero-tagline {
+      font-family: 'EB Garamond', serif;
+      font-style: italic;
+      font-size: clamp(16px, 1.6vw, 20px);
+      color: var(--cream);
+      opacity: 0.65;
+      margin-top: 28px;
+      animation: fadeUp 1.4s 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-meta {
+      display: flex;
+      gap: 48px;
+      justify-content: center;
+      margin-top: 48px;
+      font-family: 'Cormorant SC', serif;
+      font-size: 11px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--cream);
+      opacity: 0.55;
+      animation: fadeUp 1.4s 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .hero-meta span { position: relative; }
+    .hero-meta span + span::before {
+      content: '';
+      position: absolute;
+      left: -24px;
+      top: 50%;
+      width: 4px;
+      height: 4px;
+      background: var(--gold);
+      border-radius: 50%;
+      transform: translateY(-50%);
+      opacity: 0.6;
+    }
+
+    .scroll-cue {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Cormorant SC', serif;
+      font-size: 10px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--cream);
+      opacity: 0.4;
+      animation: fadeUp 1.4s 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .scroll-cue::after {
+      content: '';
+      display: block;
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+      margin: 14px auto 0;
+      animation: scrollPulse 2.2s ease-in-out infinite;
+    }
+
+    /* Decorative rings */
+    .hero-ring {
+      position: absolute;
+      border: 1px solid rgba(201, 169, 97, 0.12);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .hero-ring.r1 { width: 520px; height: 520px; animation: ringIn 2s cubic-bezier(0.16,1,0.3,1) both; }
+    .hero-ring.r2 { width: 780px; height: 780px; animation: ringIn 2s 0.15s cubic-bezier(0.16,1,0.3,1) both; border-color: rgba(201, 169, 97, 0.07); }
+    .hero-ring.r3 { width: 1100px; height: 1100px; animation: ringIn 2s 0.3s cubic-bezier(0.16,1,0.3,1) both; border-color: rgba(201, 169, 97, 0.04); }
+
+    /* Section base */
+    section { padding: 120px 48px; }
+
+    .section-label {
+      font-family: 'Cormorant SC', serif;
+      font-size: 11px;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.9;
+      margin-bottom: 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-label::before {
+      content: '';
+      width: 24px;
+      height: 1px;
+      background: var(--gold);
+      opacity: 0.6;
+    }
+
+    .jin-char { font-style: normal; font-family: "Noto Serif SC", serif; color: var(--crimson); font-weight: 400; position: relative; }
+    .pinyin { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 0.42em; font-weight: 300; color: var(--crimson); opacity: 0.6; margin-left: 14px; vertical-align: baseline; letter-spacing: 0.05em; }
+
+    /* ── PHILOSOPHY ── */
+    .philosophy {
+      background: var(--cream);
+      color: var(--crimson-deep);
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 0;
+      padding: 0;
+      min-height: 640px;
+    }
+
+    .philosophy-text {
+      padding: 120px 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .philosophy-text .section-label { color: var(--crimson); }
+    .philosophy-text .section-label::before { background: var(--crimson); opacity: 0.45; }
+
+    .philosophy-text h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(40px, 4.6vw, 68px);
+      font-weight: 300;
+      line-height: 1.02;
+      color: var(--crimson-deep);
+      margin-bottom: 36px;
+      letter-spacing: -0.01em;
+    }
+
+    .philosophy-text h2 em {
+      font-style: italic;
+      font-family: 'Noto Serif SC', serif;
+      color: var(--crimson);
+      font-weight: 300;
+    }
+
+    .philosophy-text p {
+      font-family: 'EB Garamond', serif;
+      font-size: 18px;
+      line-height: 1.75;
+      color: var(--crimson-deep);
+      opacity: 0.78;
+      max-width: 460px;
+    }
+
+    .philosophy-text p + p { margin-top: 22px; }
+
+    .philosophy-visual {
+      background: var(--crimson-oxblood);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      min-height: 640px;
+    }
+
+    .philosophy-photo {
+      position: absolute;
+      inset: 0;
+      background-image: url('assets/ref-pingyao.jpeg');
+      background-size: cover;
+      background-position: center;
+      filter: saturate(0.85) contrast(1.1) brightness(0.85);
+    }
+
+    .philosophy-visual::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(74, 2, 2, 0.4) 0%, rgba(40, 8, 8, 0.55) 100%),
+        radial-gradient(ellipse at center, rgba(74, 2, 2, 0.2) 0%, rgba(20, 4, 4, 0.6) 100%);
+      mix-blend-mode: multiply;
+      z-index: 1;
+    }
+
+    .philosophy-placeholder {
+      position: absolute;
+      inset: 24px;
+      border: 1px dashed rgba(201, 169, 97, 0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      z-index: 2;
+      text-align: center;
+      padding: 32px;
+    }
+
+    .philosophy-placeholder .ph-label {
+      font-family: 'Cormorant SC', serif;
+      font-size: 10px;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.7;
+    }
+
+    .philosophy-placeholder .ph-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 22px;
+      color: var(--cream);
+      opacity: 0.85;
+    }
+
+    .philosophy-placeholder .ph-hint {
+      font-family: 'monospace', monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: var(--cream);
+      opacity: 0.35;
+      max-width: 320px;
+      line-height: 1.6;
+    }
+
+    .philosophy-mini {
+      position: absolute;
+      top: 28px;
+      right: 28px;
+      width: 54px;
+      height: 86px;
+      opacity: 0.65;
+      z-index: 3;
+      background-image: url('assets/gold-texture.png');
+      background-size: 100% 200%;
+      background-position: center 35%;
+      -webkit-mask: url('assets/jin8-logo-cropped.png') center/contain no-repeat;
+      mask: url('assets/jin8-logo-cropped.png') center/contain no-repeat;
+    }
+
+    .philosophy-seal {
+      position: relative;
+      z-index: 1;
+    }
+
+    .philosophy-seal img {
+      width: 280px;
+      height: auto;
+      display: block;
+      opacity: 0.55;
+    }
+
+    .philosophy-caption {
+      position: absolute;
+      bottom: 48px;
+      left: 0; right: 0;
+      text-align: center;
+      font-family: 'Cormorant SC', serif;
+      font-size: 10px;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.65;
+      z-index: 2;
+    }
+
+    /* ── SIGNATURE STRIP ── */
+    .strip {
+      background: var(--ink);
+      padding: 48px;
+      text-align: center;
+      border-top: 1px solid rgba(201, 169, 97, 0.15);
+      border-bottom: 1px solid rgba(201, 169, 97, 0.15);
+    }
+
+    .strip-inner {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(18px, 2vw, 24px);
+      font-weight: 300;
+      color: var(--cream);
+      opacity: 0.75;
+      max-width: 900px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    .strip-inner em {
+      color: var(--gold);
+      font-family: 'Noto Serif SC', serif;
+      font-style: normal;
+      margin: 0 4px;
+    }
+
+    /* ── MENU ── */
+    .menu-section {
+      background: var(--crimson-deep);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .menu-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(165,0,0,0.45) 0%, transparent 60%),
+        radial-gradient(ellipse at 50% 100%, rgba(90,0,0,0.6) 0%, transparent 50%);
+    }
+
+    .menu-header { position: relative; margin-bottom: 72px; }
+
+    .menu-section h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(44px, 6vw, 84px);
+      font-weight: 300;
+      line-height: 1.02;
+      margin-bottom: 20px;
+      letter-spacing: -0.015em;
+    }
+
+    .menu-section h2 em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .menu-section .intro {
+      font-size: 18px;
+      line-height: 1.7;
+      opacity: 0.7;
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    /* Category chips */
+    .menu-categories {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 48px 0 56px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    .cat-chip {
+      font-family: 'Cormorant SC', serif;
+      font-size: 11px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      padding: 10px 22px;
+      border: 1px solid rgba(250, 240, 200, 0.18);
+      background: transparent;
+      color: var(--cream);
+      cursor: pointer;
+      transition: all 0.3s;
+      border-radius: 2px;
+      opacity: 0.7;
+    }
+
+    .cat-chip:hover { opacity: 1; border-color: rgba(201, 169, 97, 0.5); }
+    .cat-chip.active {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: var(--ink);
+      opacity: 1;
+    }
+
+    .drinks-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: rgba(201, 169, 97, 0.15);
+      border: 1px solid rgba(201, 169, 97, 0.15);
+      max-width: 1240px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* Giant 8 watermark behind the signature grid */
+    .drinks-grid-wrap {
+      position: relative;
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+    .drinks-grid-wrap::before {
+      content: '8';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 200;
+      font-size: clamp(360px, 52vw, 720px);
+      line-height: 1;
+      color: var(--gold);
+      opacity: 0.05;
+      pointer-events: none;
+      z-index: 0;
+      letter-spacing: -0.05em;
+      mix-blend-mode: screen;
+    }
+    .drinks-grid-wrap .drinks-grid { position: relative; z-index: 1; }
+    .drinks-grid-wrap .menu-soon { position: relative; z-index: 1; }
+
+    .menu-soon {
+      background: var(--crimson-deep);
+      padding: 96px 56px 88px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      animation: fadeUp 0.6s both;
+    }
+    .menu-soon-mark {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 72px;
+      color: var(--gold);
+      opacity: 0.85;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .menu-soon-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(32px, 3.4vw, 44px);
+      font-weight: 300;
+      letter-spacing: -0.005em;
+      color: var(--cream);
+      margin: 0;
+    }
+    .menu-soon-body {
+      font-family: 'EB Garamond', serif;
+      font-size: 18px;
+      line-height: 1.7;
+      color: var(--cream);
+      opacity: 0.72;
+      max-width: 540px;
+      margin: 0;
+      font-style: italic;
+    }
+    .menu-soon-meta {
+      font-family: 'Cormorant SC', serif;
+      font-size: 11px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.7;
+      margin: 18px 0 0;
+    }
+
+    .drink-card {
+      background: var(--crimson-deep);
+      padding: 44px 36px 40px;
+      text-align: left;
+      transition: background 0.35s, transform 0.35s;
+      cursor: pointer;
+      position: relative;
+      min-height: 240px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .drink-card:hover {
+      background: #4a0000;
+    }
+
+    .drink-card:hover .drink-cta { opacity: 1; transform: translateX(0); }
+
+    .drink-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
+    .drink-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13px;
+      font-style: italic;
+      opacity: 0.4;
+      letter-spacing: 0.1em;
+    }
+
+    .drink-price {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+      color: var(--gold);
+      opacity: 0.85;
+    }
+
+    .drink-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      font-weight: 300;
+      line-height: 1.2;
+      margin-bottom: 14px;
+      letter-spacing: -0.005em;
+    }
+
+    .drink-name em { font-style: italic; color: var(--gold); }
+
+    .drink-desc {
+      font-size: 14px;
+      line-height: 1.65;
+      opacity: 0.6;
+      font-style: italic;
+      margin-bottom: auto;
+    }
+
+    .drink-cta {
+      margin-top: 22px;
+      font-family: 'Cormorant SC', serif;
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0;
+      transform: translateX(-6px);
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── HOURS / VISIT ── */
+    .hours-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      padding: 0;
+      background: var(--cream);
+      color: var(--crimson-deep);
+      min-height: 540px;
+    }
+
+    .hours-left {
+      background: var(--crimson-deep);
+      color: var(--cream);
+      padding: 100px 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .hours-left h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(40px, 4.4vw, 62px);
+      font-weight: 300;
+      line-height: 1.05;
+      margin-bottom: 48px;
+      letter-spacing: -0.01em;
+    }
+
+    .hours-left h2 em { font-style: italic; color: var(--gold); }
+
+    .hours-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .hours-table tr {
+      border-bottom: 1px solid rgba(250,240,200,0.12);
+      transition: background 0.25s;
+    }
+
+    .hours-table tr:first-child { border-top: 1px solid rgba(250,240,200,0.12); }
+    .hours-table tr.today { background: rgba(201,169,97,0.08); }
+    .hours-table tr.today td { color: var(--gold); opacity: 1; }
+
+    .hours-table td {
+      padding: 18px 0;
+      font-family: 'EB Garamond', serif;
+      font-size: 17px;
+    }
+
+    .hours-table td:first-child {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hours-table td:last-child {
+      text-align: right;
+      opacity: 0.7;
+      font-style: italic;
+    }
+
+    .hours-table .closed { opacity: 0.32; font-style: italic; }
+
+    .today-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      display: inline-block;
+      opacity: 0;
+    }
+    tr.today .today-dot {
+      opacity: 1;
+      box-shadow: 0 0 10px rgba(201,169,97,0.8);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .hours-right {
+      background: var(--cream);
+      color: var(--crimson-deep);
+      padding: 100px 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .hours-right .section-label { color: var(--crimson); }
+    .hours-right .section-label::before { background: var(--crimson); opacity: 0.45; }
+
+    .hours-right h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(32px, 3.4vw, 48px);
+      font-weight: 300;
+      color: var(--crimson-deep);
+      line-height: 1.1;
+      margin-bottom: 28px;
+      letter-spacing: -0.005em;
+    }
+
+    .hours-right h2 em { font-style: italic; color: var(--crimson); }
+
+    .hours-right > p {
+      font-size: 17px;
+      line-height: 1.8;
+      opacity: 0.78;
+      color: var(--crimson-deep);
+      max-width: 420px;
+    }
+
+    .address-block {
+      margin-top: 44px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(139,0,0,0.18);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .address-item .section-label {
+      margin-bottom: 10px;
+      font-size: 10px;
+    }
+
+    .address-item p {
+      font-size: 15px;
+      font-style: italic;
+      opacity: 0.72;
+      color: var(--crimson-deep);
+      line-height: 1.55;
+    }
+
+    .address-item a {
+      color: var(--crimson);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(139,0,0,0.25);
+      padding-bottom: 1px;
+      transition: border-color 0.25s;
+    }
+    .address-item a:hover { border-color: var(--crimson); }
+
+    /* ── INQUIRY ── */
+    .inquiry {
+      background: var(--ink);
+      color: var(--cream);
+      padding: 120px 48px;
+      text-align: center;
+    }
+
+    .inquiry h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 4vw, 58px);
+      font-weight: 300;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+    .inquiry h2 em { font-style: italic; color: var(--gold); }
+
+    .inquiry > p {
+      font-size: 17px;
+      opacity: 0.65;
+      max-width: 520px;
+      margin: 0 auto 48px;
+      line-height: 1.7;
+    }
+
+    .inquiry-form {
+      max-width: 560px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .inquiry-form .wide { grid-column: 1 / -1; }
+
+    .inquiry-form input,
+    .inquiry-form select,
+    .inquiry-form textarea {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(250,240,200,0.25);
+      padding: 14px 4px;
+      color: var(--cream);
+      font-family: 'EB Garamond', serif;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.3s;
+      width: 100%;
+    }
+
+    .inquiry-form input::placeholder,
+    .inquiry-form textarea::placeholder {
+      color: rgba(250,240,200,0.4);
+      font-style: italic;
+    }
+
+    .inquiry-form input:focus,
+    .inquiry-form select:focus,
+    .inquiry-form textarea:focus {
+      border-color: var(--gold);
+    }
+
+    .inquiry-form select {
+      appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23FAF0C8' fill='none' opacity='0.5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 4px center;
+      padding-right: 24px;
+    }
+
+    .inquiry-form select option { background: var(--ink); color: var(--cream); }
+
+    .inquiry-form textarea {
+      min-height: 80px;
+      resize: vertical;
+      font-family: 'EB Garamond', serif;
+    }
+
+    .inquiry-submit {
+      grid-column: 1 / -1;
+      margin-top: 24px;
+      padding: 16px 36px;
+      font-family: 'Cormorant SC', serif;
+      font-size: 12px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      background: transparent;
+      color: var(--cream);
+      border: 1px solid var(--gold);
+      cursor: pointer;
+      transition: all 0.3s;
+      justify-self: center;
+    }
+
+    .inquiry-submit:hover {
+      background: var(--gold);
+      color: var(--ink);
+    }
+
+    .inquiry-submit:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .inquiry-success {
+      grid-column: 1 / -1;
+      padding: 20px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 18px;
+      color: var(--gold);
+      opacity: 0;
+      transition: opacity 0.4s;
+      pointer-events: none;
+    }
+    .inquiry-success.shown { opacity: 1; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #0d0303;
+      color: var(--cream);
+      text-align: center;
+      padding: 72px 48px 40px;
+      border-top: 1px solid rgba(201,169,97,0.12);
+    }
+
+    .footer-seal { margin-bottom: 24px; opacity: 0.7; display: flex; justify-content: center; position: relative; width: 54px; margin-left: auto; margin-right: auto; }
+    .footer-seal img { width: 54px; height: auto; display: block; visibility: hidden; }
+    .footer-seal::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: url('assets/gold-texture.png');
+      background-size: 100% 200%;
+      background-position: center 35%;
+      -webkit-mask: url('assets/jin8-logo-cropped.png') center/contain no-repeat;
+      mask: url('assets/jin8-logo-cropped.png') center/contain no-repeat;
+    }
+
+    .footer-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      letter-spacing: 0.25em;
+      opacity: 0.75;
+      margin-bottom: 12px;
+    }
+    .footer-name em { font-style: italic; color: var(--gold); }
+
+    .footer-loc {
+      font-size: 13px;
+      opacity: 0.4;
+      font-style: italic;
+      margin-bottom: 28px;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      margin-bottom: 32px;
+      font-family: 'Cormorant SC', serif;
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+    }
+
+    .footer-links a {
+      color: var(--cream);
+      opacity: 0.4;
+      text-decoration: none;
+      transition: opacity 0.25s, color 0.25s;
+    }
+    .footer-links a:hover { opacity: 1; color: var(--gold); }
+
+    .footer-copy {
+      font-size: 11px;
+      opacity: 0.22;
+      font-style: italic;
+      letter-spacing: 0.1em;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 2, 2, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+    .modal {
+      background: var(--cream);
+      color: var(--crimson-deep);
+      max-width: 640px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      position: relative;
+      transform: translateY(20px) scale(0.97);
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+    .modal-visual {
+      background: var(--crimson-deep);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .modal-visual::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 40%, rgba(165,0,0,0.7) 0%, var(--crimson-deep) 75%);
+    }
+
+    .modal-visual img {
+      width: 120px;
+      height: auto;
+      position: relative;
+      z-index: 1;
+      visibility: hidden;
+      display: block;
+    }
+
+    .modal-visual {
+      position: relative;
+    }
+
+    .modal-visual::after {
+      content: '';
+      position: absolute; top: 50%; left: 50%;
+      width: 120px; height: calc(120px * 1.59);
+      transform: translate(-50%, -50%);
+      z-index: 1;
+      background-image: url('assets/gold-texture.png');
+      background-size: 100% 200%;
+      background-position: center 35%;
+      -webkit-mask: url('assets/jin8-logo-cropped.png') center/contain no-repeat;
+      mask: url('assets/jin8-logo-cropped.png') center/contain no-repeat;
+      opacity: 0.95;
+      pointer-events: none;
+    }
+
+    .modal-visual .modal-num {
+      position: absolute;
+      top: 20px;
+      left: 24px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      color: var(--gold);
+      opacity: 0.8;
+      font-size: 13px;
+      letter-spacing: 0.15em;
+      z-index: 2;
+    }
+
+    .modal-body { padding: 40px 36px; }
+
+    .modal-body .cat {
+      font-family: 'Cormorant SC', serif;
+      font-size: 10px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--crimson);
+      opacity: 0.7;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .modal-body h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 34px;
+      font-weight: 300;
+      line-height: 1.1;
+      margin-bottom: 14px;
+      letter-spacing: -0.01em;
+    }
+    .modal-body h3 em { font-style: italic; color: var(--crimson); }
+
+    .modal-body .tagline {
+      font-style: italic;
+      font-size: 15px;
+      opacity: 0.65;
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+
+    .modal-section { margin-top: 22px; }
+    .modal-section .label {
+      font-family: 'Cormorant SC', serif;
+      font-size: 9px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      opacity: 0.55;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .modal-section p, .modal-section ul {
+      font-size: 15px;
+      line-height: 1.65;
+      opacity: 0.82;
+    }
+    .modal-section ul { list-style: none; }
+    .modal-section ul li {
+      padding: 4px 0;
+      border-bottom: 1px dashed rgba(139,0,0,0.15);
+      font-size: 14px;
+    }
+    .modal-section ul li:last-child { border-bottom: none; }
+
+    .modal-footer {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(139,0,0,0.18);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-price {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      color: var(--crimson);
+    }
+    .modal-strength {
+      font-family: 'Cormorant SC', serif;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      opacity: 0.55;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 34px;
+      height: 34px;
+      border: none;
+      background: rgba(250,240,200,0.1);
+      color: var(--cream);
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      border-radius: 50%;
+      transition: background 0.25s;
+      z-index: 3;
+    }
+    .modal-close:hover { background: rgba(250,240,200,0.25); }
+
+    /* ── TWEAKS PANEL ── */
+    .tweaks {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(20, 6, 6, 0.94);
+      border: 1px solid rgba(201,169,97,0.25);
+      backdrop-filter: blur(12px);
+      padding: 18px 20px;
+      z-index: 300;
+      font-family: 'Cormorant SC', serif;
+      color: var(--cream);
+      display: none;
+      border-radius: 2px;
+      min-width: 240px;
+    }
+    .tweaks.visible { display: block; }
+    .tweaks h4 {
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 14px;
+      font-weight: 400;
+    }
+    .tweaks .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+    }
+    .tweaks .row label { opacity: 0.7; }
+    .tweaks .swatches { display: flex; gap: 6px; }
+    .tweaks .sw {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.2s;
+    }
+    .tweaks .sw.active { border-color: var(--gold); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes photoIn {
+      from { opacity: 0; transform: scale(1.08); }
+      to   { opacity: var(--photo-opacity, 0.42); transform: scale(1); }
+    }
+    @keyframes kenBurns {
+      0%   { transform: scale(1) translate(0, 0); }
+      100% { transform: scale(1.08) translate(-1.5%, -1%); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes ringIn {
+      from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.3; transform: scaleY(0.7); transform-origin: top; }
+      50%      { opacity: 1; transform: scaleY(1); }
+    }
+    @keyframes sealRotate {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0.4; }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1), transform 0.9s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) and (min-width: 901px) {
+      .drinks-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 900px) {
+      nav { padding: 18px 22px; }
+      .nav-links { gap: 18px; }
+      .nav-links a { font-size: 10px; letter-spacing: 0.14em; }
+      .nav-cta { display: none; }
+      section { padding: 80px 22px; }
+      .philosophy { grid-template-columns: 1fr; }
+      .philosophy-text { padding: 72px 32px; }
+      .philosophy-visual { min-height: 360px; }
+      .drinks-grid { grid-template-columns: 1fr; }
+      .drinks-grid-wrap::before { font-size: 280px; opacity: 0.06; }
+      .hours-section { grid-template-columns: 1fr; }
+      .hours-left, .hours-right { padding: 72px 32px; }
+      .address-block { grid-template-columns: 1fr; }
+      .modal { grid-template-columns: 1fr; max-width: 420px; }
+      .modal-visual { min-height: 200px; padding: 32px; }
+      .hero-meta { gap: 32px; flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Logo: brush-lettered Jin 8 mark (346×551 cropped) -->
+<style>
+  .logo-img { display:block; width:100%; height:100%; object-fit:contain; }
+  .logo-wrap { display:inline-block; }
+</style>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <span class="nav-seal"><img src="assets/jin8-logo-royal.png" alt="Jin 8"></span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#about">Our Story</a></li>
+    <li><a href="#drinks">The Menu</a></li>
+    <li><a href="#visit">Find Us</a></li>
+    <li><button class="nav-cta" onclick="document.getElementById('inquiry').scrollIntoView({behavior:'smooth',block:'start'})">Say Hello</button></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-photo"></div>
+  <div class="hero-ring r1"></div>
+  <div class="hero-ring r2"></div>
+  <div class="hero-ring r3"></div>
+
+  <div class="hero-content">
+    <div class="hero-seal">
+      <img src="assets/jin8-logo-royal.png" alt="Jin 8">
+    </div>
+
+    <p class="hero-kicker">Est. 2024</p>
+    <h1 class="hero-name">JIN <em>8</em></h1>
+    <p class="hero-tagline">Where the merchant roads of old Shanxi meet the glass on the bar.</p>
+
+    <div class="hero-meta">
+      <span>Box Hill VIC</span>
+    </div>
+  </div>
+
+  <div class="scroll-cue">Enter</div>
+</section>
+
+<!-- PHILOSOPHY -->
+<div class="philosophy" id="about">
+  <div class="philosophy-text reveal">
+    <span class="section-label">Our Story</span>
+    <h2>Rooted in <span class="jin-char">晋<sup class="pinyin">(jìn)</sup></span><br>the heart of Shanxi.</h2>
+    <p>For centuries the merchant clans of Shanxi — the Jìn Shāng — moved silk, coal, tea and culture along China's oldest trade routes. They were patient people, who believed that anything worth making was worth making slowly.</p>
+    <p>Jin 8 carries that spirit south to Box Hill. Every cocktail draws from Shanxi's living traditions — the aged vinegar of Qingxu, the mellow fire of Fén Jiǔ, the millet and honey of the loess plateau — poured one careful glass at a time.</p>
+  </div>
+  <div class="philosophy-visual">
+    <div class="philosophy-photo"></div>
+    <div class="philosophy-mini" aria-hidden="true"></div>
+    <p class="philosophy-caption">晋</p>
+  </div>
+</div>
+
+<!-- SIGNATURE STRIP -->
+<div class="strip">
+  <p class="strip-inner">
+    "The traveller who is in no hurry <em>晋</em> arrives by candlelight, and finds the vinegar has been waiting three hundred years."
+  </p>
+</div>
+
+<!-- DRINKS -->
+<section class="menu-section" id="drinks">
+  <div class="menu-header">
+    <span class="section-label reveal" style="justify-content:center;display:inline-flex;">Craft Cocktails</span>
+    <h2 class="reveal">The <em>Ancient</em><br>Made New</h2>
+    <p class="intro reveal">From Shanxi's centuries-old fermentation cellars to the sacred peaks of Wutai — each cocktail is a window into a province that has been quietly perfecting flavour for over three thousand years.</p>
+  </div>
+
+  <div class="menu-categories reveal">
+    <button class="cat-chip active" data-cat="signature">The Signature 8</button>
+    <button class="cat-chip" data-cat="fen">Fén Jiǔ</button>
+    <button class="cat-chip" data-cat="chinese">Other Chinese Spirits</button>
+    <button class="cat-chip" data-cat="classics">Classics</button>
+    <button class="cat-chip" data-cat="whiskey">Whiskey</button>
+    <button class="cat-chip" data-cat="wine">Wine</button>
+    <button class="cat-chip" data-cat="other">Other</button>
+  </div>
+
+  <div class="drinks-grid-wrap">
+    <div class="drinks-grid" id="drinks-grid">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- HOURS + VISIT -->
+<div class="hours-section" id="visit">
+  <div class="hours-left reveal">
+    <span class="section-label">Opening Hours</span>
+    <h2>When to<br><em>find us.</em></h2>
+    <table class="hours-table" id="hours-table">
+      <tr data-day="1"><td><span class="today-dot"></span>Monday</td><td class="closed">Closed</td></tr>
+      <tr data-day="2"><td><span class="today-dot"></span>Tuesday</td><td class="closed">Closed</td></tr>
+      <tr data-day="3"><td><span class="today-dot"></span>Wednesday</td><td>6pm — 11pm</td></tr>
+      <tr data-day="4"><td><span class="today-dot"></span>Thursday</td><td>6pm — 11pm</td></tr>
+      <tr data-day="5"><td><span class="today-dot"></span>Friday</td><td>6pm — 1am</td></tr>
+      <tr data-day="6"><td><span class="today-dot"></span>Saturday</td><td>6pm — 1am</td></tr>
+      <tr data-day="0"><td><span class="today-dot"></span>Sunday</td><td>6pm — 11pm</td></tr>
+    </table>
+  </div>
+  <div class="hours-right reveal">
+    <span class="section-label">Find Us</span>
+    <h2>A place to<br><em>linger.</em></h2>
+    <p>Like the ancient courtyard inns of Pingyao, Jin 8 is built for those who appreciate the unhurried. No reservations, no rush — just the company of good people and something worth savouring.</p>
+
+    <div class="address-block">
+      <div class="address-item">
+        <span class="section-label">Address</span>
+        <p>18B Rutland Road<br>Box Hill VIC 3128</p>
+      </div>
+      <div class="address-item">
+        <span class="section-label">Contact</span>
+        <p><a href="mailto:hello@jin8bar.com">hello@jin8bar.com</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INQUIRY / EVENTS -->
+<section class="inquiry" id="inquiry">
+  <h2>Private gatherings &<br><em>small celebrations.</em></h2>
+  <p>While we don't take reservations for the bar, we do host private events and tastings by arrangement. Tell us a little about what you have in mind.</p>
+
+  <form class="inquiry-form" id="inquiry-form" novalidate>
+    <input type="text" name="name" placeholder="Your name" required aria-label="Name">
+    <input type="email" name="email" placeholder="Email" required aria-label="Email">
+    <select name="occasion" required aria-label="Occasion">
+      <option value="">Occasion</option>
+      <option>Private tasting</option>
+      <option>Small gathering (8–20)</option>
+      <option>Full venue hire</option>
+      <option>Press / media</option>
+      <option>Just saying hello</option>
+    </select>
+    <input type="text" name="date" placeholder="Preferred date (approx.)" aria-label="Date">
+    <textarea class="wide" name="note" placeholder="A few words about what you have in mind…" aria-label="Note"></textarea>
+    <button type="submit" class="inquiry-submit">Send Inquiry</button>
+    <div class="inquiry-success" id="inquiry-success">Thank you — we'll be in touch within a day or two.</div>
+  </form>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-seal">
+    <img src="assets/jin8-logo-royal.png" alt="Jin 8">
+  </div>
+  <p class="footer-name">Jin <em>8</em></p>
+  <p class="footer-loc">18B Rutland Road, Box Hill VIC 3128</p>
+  <div class="footer-links">
+    <a href="#about">Story</a>
+    <a href="#drinks">Menu</a>
+    <a href="#visit">Visit</a>
+    <a href="#inquiry">Contact</a>
+    <a href="https://www.instagram.com" target="_blank" rel="noopener">Instagram</a>
+  </div>
+  <p class="footer-copy">© 2026 Jin 8 · Crafted slowly, in the Shanxi way.</p>
+</footer>
+
+<!-- DRINK MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()" aria-label="Close">×</button>
+    <div class="modal-visual">
+      <span class="modal-num" id="modal-num">01</span>
+      <img src="assets/jin8-logo-royal.png" alt="">
+    </div>
+    <div class="modal-body">
+      <span class="cat" id="modal-cat">Fén Jiǔ</span>
+      <h3 id="modal-name">Fén Jiǔ <em>Old Fashioned</em></h3>
+      <p class="tagline" id="modal-tagline">Shanxi's most celebrated baijiu, dressed in the clothes of a classic.</p>
+
+      <div class="modal-section">
+        <span class="label">The Pour</span>
+        <ul id="modal-ingredients"></ul>
+      </div>
+
+      <div class="modal-section">
+        <span class="label">Note</span>
+        <p id="modal-note"></p>
+      </div>
+
+      <div class="modal-footer">
+        <span class="modal-price" id="modal-price">$24</span>
+        <span class="modal-strength" id="modal-strength">Strong · Spirit-Forward</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TWEAKS -->
+<div class="tweaks" id="tweaks">
+  <h4>Tweaks</h4>
+  <div class="row">
+    <label>Accent</label>
+    <div class="swatches" id="sw-accent">
+      <div class="sw active" data-color="#C9A961" style="background:#C9A961"></div>
+      <div class="sw" data-color="#E8D898" style="background:#E8D898"></div>
+      <div class="sw" data-color="#D4AF37" style="background:#D4AF37"></div>
+      <div class="sw" data-color="#FAF0C8" style="background:#FAF0C8"></div>
+    </div>
+  </div>
+  <div class="row">
+    <label>Backdrop</label>
+    <div class="swatches" id="sw-crimson">
+      <div class="sw active" data-color="#8B0000" style="background:#8B0000"></div>
+      <div class="sw" data-color="#6B0F0F" style="background:#6B0F0F"></div>
+      <div class="sw" data-color="#A50000" style="background:#A50000"></div>
+      <div class="sw" data-color="#4A0000" style="background:#4A0000"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ─────────────────────────────────
+     DRINKS DATA
+  ───────────────────────────────── */
+  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "accent": "#E8D898",
+    "crimson": "#6B0F0F"
+  }/*EDITMODE-END*/;
+
+  const drinks = [
+    { num:'01', cat:'fen', catLabel:'Fén Jiǔ',
+      name:"Fén Jiǔ <em>Old Fashioned</em>",
+      tagline:"Shanxi's most celebrated baijiu, dressed in the clothes of a classic.",
+      desc:"Xinghuacun baijiu, rock sugar syrup, walnut bitters, dried tangerine peel",
+      ingredients:["45ml Xinghuacun Fén Jiǔ","Rock sugar syrup","House walnut bitters","Dried tangerine peel","Hand-cut ice"],
+      note:"Fén Jiǔ is lighter than its northern cousins — sorghum-clean, with a faint stone-fruit note. We let it lead.",
+      price:"$24", strength:"Strong · Spirit-Forward" },
+    { num:'02', cat:'vinegar', catLabel:'Aged Vinegar',
+      name:"The <em>Jin</em> Merchant",
+      tagline:"For the traveller returning from the Silk Road with stories to tell.",
+      desc:"Rye, aged Shanxi vinegar shrub, jujube honey, smoked walnut bitters",
+      ingredients:["40ml rye whisky","8-year Qingxu vinegar shrub","Jujube honey","Smoked walnut bitters","Orange oil"],
+      note:"The vinegar doesn't bite — it deepens. Think of it as a slower, more patient citrus.",
+      price:"$26", strength:"Strong · Balanced" },
+    { num:'03', cat:'classic', catLabel:'Classic Twist',
+      name:"Pingyao <em>Wall</em>",
+      tagline:"Named for the ancient city that has stood watch for six centuries.",
+      desc:"Dark rum, Qingxu black vinegar reduction, five spice, smoked salt rim",
+      ingredients:["40ml dark rum","Qingxu black vinegar reduction","Five-spice syrup","Smoked salt rim","Cinnamon smoke"],
+      note:"Built low and wide, like the walls themselves. It arrives serious and stays that way.",
+      price:"$25", strength:"Medium · Savoury" },
+    { num:'04', cat:'mountain', catLabel:'Mountain',
+      name:"<em>Wutai</em> Cloud",
+      tagline:"For the slow-moving hour, when the mist comes down over the monastery.",
+      desc:"Gin, snow fungus syrup, chrysanthemum, white grape, elderflower foam",
+      ingredients:["45ml juniper-forward gin","Snow fungus syrup","Chrysanthemum tea","White grape","Elderflower foam"],
+      note:"Floral, soft, almost silent. Served tall in a chilled coupe.",
+      price:"$23", strength:"Light · Floral" },
+    { num:'05', cat:'fen', catLabel:'Fén Jiǔ',
+      name:"Yungang <em>Stone</em>",
+      tagline:"Carved for patience, like the grottoes themselves.",
+      desc:"Aged baijiu, osmanthus honey, lychee, a slow pour of aged vinegar",
+      ingredients:["40ml aged baijiu","Osmanthus honey","Fresh lychee","A drizzle of 5-year vinegar","Large rock"],
+      note:"The vinegar is added last — a single slow pour across the back of a spoon.",
+      price:"$26", strength:"Medium · Aromatic" },
+    { num:'06', cat:'vinegar', catLabel:'Aged Vinegar',
+      name:"<em>Hengshan</em> Sour",
+      tagline:"The hanging monastery in a glass — improbable, balanced, still standing.",
+      desc:"Whisky, Shanxi millet vinegar, millet syrup, egg white, sesame oil drop",
+      ingredients:["45ml single-malt","Shanxi millet vinegar","Toasted millet syrup","Egg white","A single drop of sesame oil"],
+      note:"Shake hard. The sesame drop sits on top — smell it before the first sip.",
+      price:"$25", strength:"Medium · Tart" },
+    { num:'07', cat:'mountain', catLabel:'Mountain',
+      name:"Taihang <em>Dusk</em>",
+      tagline:"The colour of the Taihang mountains just before the sun gives up.",
+      desc:"Mezcal, sea buckthorn, goji reduction, Sichuan pepper tincture",
+      ingredients:["35ml mezcal","Sea buckthorn","Goji berry reduction","Sichuan pepper tincture","Salt flake"],
+      note:"Warm, smoky, with a slow tingle that creeps up a minute after you swallow.",
+      price:"$27", strength:"Strong · Smoky" },
+    { num:'08', cat:'classic', catLabel:'Classic Twist',
+      name:"Silk <em>Road</em> Martini",
+      tagline:"Everything a merchant carried home, in one upward-curving glass.",
+      desc:"Vodka, dry vermouth washed with Xinghuacun, saffron, caviar of black vinegar",
+      ingredients:["50ml vodka","Xinghuacun-washed vermouth","Saffron thread","Black vinegar pearls","Lemon twist"],
+      note:"Our most elegant pour. The vinegar pearls break slowly, changing the drink as you sip.",
+      price:"$28", strength:"Strong · Dry" }
+  ];
+
+  /* ─────────────────────────────────
+     RENDER DRINKS
+  ───────────────────────────────── */
+  const grid = document.getElementById('drinks-grid');
+  const COMING_SOON_COPY = {
+    chinese: { title:'Other Chinese Spirits', body:'Báijiǔ houses beyond Shanxi, mijiu, huangjiu and a few quiet finds from the south. The full pour list opens with the bar.' },
+    classics: { title:'Classics', body:'The canon — done properly. Negronis, martinis, old fashioneds. Stirred long, served cold, no shortcuts.' },
+    whiskey:  { title:'Whiskey', body:'Scotch, Japanese, a small Australian shelf, and the rye worth talking about. Tasting flights on request.' },
+    wine:     { title:'Wine', body:'A short list, chosen by hand. Natural-leaning, food-friendly, and a few bottles worth the occasion.' },
+    other:    { title:'Other', body:'Beer, soft drinks, tea service, and the zero-proof menu. Everyone who walks in deserves something thoughtful.' }
+  };
+
+  function renderDrinks(filter='signature'){
+    if (COMING_SOON_COPY[filter]) {
+      const c = COMING_SOON_COPY[filter];
+      grid.innerHTML = `
+        <div class="menu-soon" style="grid-column: 1 / -1;">
+          <span class="menu-soon-mark">晋</span>
+          <h3 class="menu-soon-title">${c.title}</h3>
+          <p class="menu-soon-body">${c.body}</p>
+          <p class="menu-soon-meta">Full menu revealed at opening</p>
+        </div>
+      `;
+      return;
+    }
+    const list = filter==='signature' ? drinks : drinks.filter(d => d.cat===filter);
+    grid.innerHTML = list.map((d,i) => `
+      <div class="drink-card reveal visible" data-idx="${drinks.indexOf(d)}" style="animation: fadeUp 0.6s ${i*0.05}s both;">
+        <div class="drink-card-head">
+          <span class="drink-num">${d.num}</span>
+          <span class="drink-price">${d.price}</span>
+        </div>
+        <div class="drink-name">${d.name}</div>
+        <div class="drink-desc">${d.desc}</div>
+        <div class="drink-cta">View details →</div>
+      </div>
+    `).join('');
+    document.querySelectorAll('.drink-card').forEach(card => {
+      card.addEventListener('click', () => openModal(parseInt(card.dataset.idx)));
+    });
+  }
+  renderDrinks();
+
+  // Category filters
+  document.querySelectorAll('.cat-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      renderDrinks(chip.dataset.cat);
+    });
+  });
+
+  /* ─────────────────────────────────
+     MODAL
+  ───────────────────────────────── */
+  const overlay = document.getElementById('modal-overlay');
+  function openModal(idx){
+    const d = drinks[idx];
+    document.getElementById('modal-num').textContent = d.num;
+    document.getElementById('modal-cat').textContent = d.catLabel;
+    document.getElementById('modal-name').innerHTML = d.name;
+    document.getElementById('modal-tagline').textContent = d.tagline;
+    document.getElementById('modal-ingredients').innerHTML = d.ingredients.map(i=>`<li>${i}</li>`).join('');
+    document.getElementById('modal-note').textContent = d.note;
+    document.getElementById('modal-price').textContent = d.price;
+    document.getElementById('modal-strength').textContent = d.strength;
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(){
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+
+  /* ─────────────────────────────────
+     NAV SCROLL
+  ───────────────────────────────── */
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  /* ─────────────────────────────────
+     REVEAL ON SCROLL
+  ───────────────────────────────── */
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 60);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  reveals.forEach(el => observer.observe(el));
+
+  /* ─────────────────────────────────
+     HIGHLIGHT TODAY IN HOURS
+  ───────────────────────────────── */
+  const today = new Date().getDay();
+  const todayRow = document.querySelector(`#hours-table tr[data-day="${today}"]`);
+  if (todayRow) todayRow.classList.add('today');
+
+  /* ─────────────────────────────────
+     INQUIRY FORM
+  ───────────────────────────────── */
+  const form = document.getElementById('inquiry-form');
+  const success = document.getElementById('inquiry-success');
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const btn = form.querySelector('.inquiry-submit');
+    const data = new FormData(form);
+    if (!data.get('name') || !data.get('email') || !data.get('occasion')) {
+      form.querySelectorAll('[required]').forEach(el => {
+        if (!el.value) el.style.borderBottomColor = 'var(--gold)';
+      });
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    setTimeout(() => {
+      form.querySelectorAll('input, select, textarea').forEach(el => { el.value=''; el.disabled=true; });
+      btn.style.display = 'none';
+      success.classList.add('shown');
+    }, 900);
+  });
+
+  /* ─────────────────────────────────
+     TWEAKS
+  ───────────────────────────────── */
+  const tweaks = document.getElementById('tweaks');
+  let tweakState = {...TWEAK_DEFAULTS};
+
+  function applyTweaks(state){
+    document.documentElement.style.setProperty('--gold', state.accent);
+    document.documentElement.style.setProperty('--crimson', state.crimson);
+  }
+  applyTweaks(tweakState);
+
+  function wireSwatches(groupId, key){
+    document.querySelectorAll(`#${groupId} .sw`).forEach(sw => {
+      sw.addEventListener('click', () => {
+        document.querySelectorAll(`#${groupId} .sw`).forEach(s=>s.classList.remove('active'));
+        sw.classList.add('active');
+        tweakState[key] = sw.dataset.color;
+        applyTweaks(tweakState);
+        window.parent.postMessage({type:'__edit_mode_set_keys', edits:{[key]: sw.dataset.color}}, '*');
+      });
+    });
+  }
+  wireSwatches('sw-accent', 'accent');
+  wireSwatches('sw-crimson', 'crimson');
+
+  // Set initial active swatch based on defaults
+  document.querySelectorAll('#sw-accent .sw').forEach(s => s.classList.toggle('active', s.dataset.color===tweakState.accent));
+  document.querySelectorAll('#sw-crimson .sw').forEach(s => s.classList.toggle('active', s.dataset.color===tweakState.crimson));
+
+  window.addEventListener('message', e => {
+    if (e.data?.type==='__activate_edit_mode') tweaks.classList.add('visible');
+    if (e.data?.type==='__deactivate_edit_mode') tweaks.classList.remove('visible');
+  });
+  window.parent.postMessage({type:'__edit_mode_available'}, '*');
+</script>
+</body>
+</html>

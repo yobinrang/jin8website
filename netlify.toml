@@ -1,10 +1,7 @@
-# Netlify deploy config — static site, no build step.
-# Tells Netlify which folder to publish.
+# Netlify deploy config — static site, files live at repo root.
+# No build step required.
 
-[build]
-  publish = "netlify-deploy"
-
-# Cache static assets aggressively — they have content-hashed names.
+# Cache static assets aggressively.
 [[headers]]
   for = "/assets/*"
   [headers.values]

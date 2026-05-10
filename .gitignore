@@ -15,3 +15,9 @@ node_modules/
 
 # Logs
 *.log
+
+# Source bundles from the design tool — re-fetch when needed,
+# don't bloat the deploy repo.
+jin-8/
+jin-8-website/
+*.tar.gz

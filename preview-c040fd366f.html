@@ -1379,7 +1379,9 @@
   <h2>Private gatherings &<br><em>small celebrations.</em></h2>
   <p>While we don't take reservations for the bar, we do host private events and tastings by arrangement. Tell us a little about what you have in mind.</p>
 
-  <form class="inquiry-form" id="inquiry-form" novalidate>
+  <form class="inquiry-form" id="inquiry-form" name="inquiry" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+    <input type="hidden" name="form-name" value="inquiry">
+    <p hidden><label>Don't fill this out: <input name="bot-field"></label></p>
     <input type="text" name="name" placeholder="Your name" required aria-label="Name">
     <input type="email" name="email" placeholder="Email" required aria-label="Email">
     <select name="occasion" required aria-label="Occasion">
@@ -1613,8 +1615,10 @@
   if (todayRow) todayRow.classList.add('today');
 
   /* ─────────────────────────────────
-     INQUIRY FORM
-     Stub: client-side only. Wire to a real handler before launch.
+     INQUIRY FORM — wired to Netlify Forms
+     Submission is POSTed to "/" which Netlify intercepts; receipt
+     emails go to whichever address you configure in the Netlify
+     dashboard (Forms → Notifications).
   ───────────────────────────────── */
   const form = document.getElementById('inquiry-form');
   const success = document.getElementById('inquiry-success');
@@ -1630,11 +1634,20 @@
     }
     btn.disabled = true;
     btn.textContent = 'Sending…';
-    setTimeout(() => {
+    const body = new URLSearchParams(data).toString();
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body
+    }).then(res => {
+      if (!res.ok) throw new Error('Submit failed: ' + res.status);
       form.querySelectorAll('input, select, textarea').forEach(el => { el.value=''; el.disabled=true; });
       btn.style.display = 'none';
       success.classList.add('shown');
-    }, 900);
+    }).catch(() => {
+      btn.disabled = false;
+      btn.textContent = 'Try again';
+    });
   });
 </script>
 </body>

@@ -225,6 +225,104 @@
     stroke-width: 1.4;
   }
 
+  /* Contact form (disclosure) */
+  .contact-toggle {
+    margin-top: 28px;
+    text-align: center;
+    animation: fadeUp 1.4s 0.9s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  .contact-toggle summary {
+    list-style: none;
+    cursor: pointer;
+    font-family: 'Cormorant SC', serif;
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--cream);
+    opacity: 0.7;
+    padding: 8px 0;
+    transition: opacity 0.25s, color 0.25s;
+    display: inline-block;
+  }
+  .contact-toggle summary::-webkit-details-marker { display: none; }
+  .contact-toggle summary:hover { color: var(--gold); opacity: 1; }
+  .contact-toggle[open] summary { color: var(--gold); opacity: 1; }
+  .contact-toggle summary::after {
+    content: ' +';
+    color: var(--gold);
+    margin-left: 8px;
+    transition: transform 0.25s;
+    display: inline-block;
+  }
+  .contact-toggle[open] summary::after { content: ' ×'; }
+
+  .contact-form {
+    margin-top: 24px;
+    width: min(420px, 80vw);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    text-align: left;
+    animation: fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  .contact-form input,
+  .contact-form textarea {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(250,240,200,0.25);
+    padding: 10px 4px;
+    color: var(--cream);
+    font-family: 'EB Garamond', serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.3s;
+    width: 100%;
+  }
+  .contact-form input::placeholder,
+  .contact-form textarea::placeholder {
+    color: rgba(250,240,200,0.4);
+    font-style: italic;
+  }
+  .contact-form input:focus,
+  .contact-form textarea:focus {
+    border-color: var(--gold);
+  }
+  .contact-form textarea {
+    min-height: 70px;
+    resize: vertical;
+    font-family: 'EB Garamond', serif;
+  }
+  .contact-form button {
+    margin-top: 8px;
+    padding: 12px 28px;
+    font-family: 'Cormorant SC', serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--cream);
+    border: 1px solid var(--gold);
+    cursor: pointer;
+    transition: all 0.3s;
+    align-self: center;
+  }
+  .contact-form button:hover {
+    background: var(--gold);
+    color: #2a0606;
+  }
+  .contact-form button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .contact-success {
+    text-align: center;
+    color: var(--gold);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 16px;
+    padding: 16px 0;
+    display: none;
+  }
+  .contact-success.shown { display: block; }
+  .contact-form.hidden { display: none; }
+
   /* Bottom marker */
   .footer-mark {
     position: absolute;
@@ -287,10 +385,51 @@
         Contact Us
       </a>
     </div>
+
+    <details class="contact-toggle">
+      <summary>Send us a message</summary>
+      <form class="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="contact-form">
+        <input type="hidden" name="form-name" value="contact">
+        <p hidden><label>Don't fill this out: <input name="bot-field"></label></p>
+        <input type="text" name="name" placeholder="Your name" required aria-label="Your name">
+        <input type="email" name="email" placeholder="Your email" required aria-label="Your email">
+        <textarea name="message" placeholder="A few words…" required aria-label="Message"></textarea>
+        <button type="submit">Send</button>
+      </form>
+      <p class="contact-success" id="contact-success">Thank you — we'll be in touch soon.</p>
+    </details>
   </div>
 
   <div class="footer-mark">An ode to the merchants of old</div>
 </div>
 
+<script>
+  // AJAX submit so visitors stay on the page and see the thank-you state.
+  // Netlify Forms still receives the submission via the same endpoint.
+  (function(){
+    var form = document.getElementById('contact-form');
+    if (!form) return;
+    var success = document.getElementById('contact-success');
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      var data = new URLSearchParams(new FormData(form)).toString();
+      fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: data
+      }).then(function(res){
+        if (!res.ok) throw new Error('Submit failed: ' + res.status);
+        form.classList.add('hidden');
+        success.classList.add('shown');
+      }).catch(function(){
+        btn.disabled = false;
+        btn.textContent = 'Try again';
+      });
+    });
+  })();
+</script>
 </body>
 </html>

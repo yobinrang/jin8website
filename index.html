@@ -34,8 +34,8 @@
     font-family: 'EB Garamond', serif;
     color: var(--cream);
     background: #420606;
-    overflow: hidden;
     position: relative;
+    min-height: 100vh;
   }
 
   /* Grain */
@@ -51,15 +51,16 @@
   }
 
   .stage {
-    position: fixed;
-    inset: 0;
+    position: relative;
+    min-height: 100vh;
     background: #2a0606;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 56px 40px;
+    padding: 56px 40px 88px;  /* extra bottom padding so content never collides with footer-mark */
     z-index: 1;
+    overflow: hidden;  /* keep the city-backdrop edges contained */
   }
 
   /* Real photo backdrop */
@@ -399,6 +400,20 @@
 </div>
 
 <script>
+  // Smoothly scroll the form into view when the disclosure opens.
+  (function(){
+    var toggle = document.querySelector('.contact-toggle');
+    if (toggle) {
+      toggle.addEventListener('toggle', function(){
+        if (toggle.open) {
+          setTimeout(function(){
+            toggle.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 60);
+        }
+      });
+    }
+  })();
+
   // AJAX submit so visitors stay on the page and see the thank-you state.
   // Netlify Forms still receives the submission via the same endpoint.
   (function(){

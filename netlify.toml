@@ -1,5 +1,37 @@
-# Netlify deploy config — static site, files live at repo root.
-# No build step required.
+# Netlify deploy config — static site at repo root + serverless functions.
+# No build command; Netlify installs package.json deps for the functions.
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# /menu is INACTIVE during the soft opening: bounce to the Coming Soon page.
+# The menu lives inside the gated invitation for now. Delete these two
+# redirect blocks at full launch to make /menu (and the printed QR) live.
+[[redirects]]
+  from = "/menu"
+  to = "/"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/menu/*"
+  to = "/"
+  status = 302
+  force = true
+
+# Secret pages: never indexed, never cached.
+[[headers]]
+  for = "/soft-opening-bb877a1e5e6b/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/admin-7d4a853713e1/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-store"
 
 # Cache static assets aggressively.
 [[headers]]

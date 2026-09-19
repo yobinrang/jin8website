@@ -10,8 +10,13 @@
 .vscode/
 .idea/
 
-# Local node modules (if you ever add a build step)
+# Node
 node_modules/
+
+# Secrets + Netlify CLI state (never commit)
+.env
+.env.*
+.netlify/
 
 # Logs
 *.log

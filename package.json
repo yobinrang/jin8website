@@ -1,0 +1,9 @@
+{
+  "name": "jin8-website",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@netlify/blobs": "^11.1.0"
+  }
+}

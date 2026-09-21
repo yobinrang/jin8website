@@ -11,14 +11,51 @@ import { readIndex, removeFromIndex, reconcileIndex } from '../lib/index.mjs';
 // DELETE /api/admin?phone=+61…   removes one registration.
 // GET /api/admin?diag=1&probe=+61…   diagnostic: what each store can see.
 
-function authorised(req) {
-  const key = req.headers.get('x-admin-key') || '';
-  const expected = process.env.ADMIN_KEY || '';
-  return expected.length >= 8 && safeEqual(key, expected);
+// Two credentials are accepted in the x-admin-key header:
+//   • ADMIN_KEY — the long random key (no lockout)
+//   • ADMIN_PIN — Robin's short PIN, protected by a global lockout:
+//     5 wrong attempts → PIN sign-in frozen for 15 minutes (the long key
+//     still works during a freeze).
+const LOCK_MAX = 5;
+const LOCK_MS = 15 * 60 * 1000;
+
+async function lockStore() {
+  const { getStore } = await import('@netlify/blobs');
+  return getStore({ name: 'admin-lock', region: 'ap-southeast-2', consistency: 'strong' });
+}
+
+async function authorise(req) {
+  const given = req.headers.get('x-admin-key') || '';
+  const key = process.env.ADMIN_KEY || '';
+  if (key.length >= 8 && given && safeEqual(given, key)) return { ok: true };
+
+  const pin = process.env.ADMIN_PIN || '';
+  if (!pin || !given) return { ok: false, status: 401, error: 'Unauthorised.' };
+
+  const store = await lockStore();
+  const lock = (await store.get('pin', { type: 'json' })) || { fails: 0, until: 0 };
+  const now = Date.now();
+  if (lock.until > now) {
+    const mins = Math.ceil((lock.until - now) / 60000);
+    return { ok: false, status: 429, error: `Too many attempts. Try again in ${mins} min.` };
+  }
+  if (safeEqual(given, pin)) {
+    if (lock.fails) await store.setJSON('pin', { fails: 0, until: 0 });
+    return { ok: true };
+  }
+  const fails = (lock.fails || 0) + 1;
+  if (fails >= LOCK_MAX) {
+    await store.setJSON('pin', { fails: 0, until: now + LOCK_MS });
+    return { ok: false, status: 429, error: 'Too many attempts. PIN locked for 15 minutes.' };
+  }
+  await store.setJSON('pin', { fails, until: 0 });
+  const left = LOCK_MAX - fails;
+  return { ok: false, status: 401, error: `Wrong PIN. ${left} attempt${left === 1 ? '' : 's'} left.` };
 }
 
 export default async (req) => {
-  if (!authorised(req)) return json(401, { error: 'Unauthorised.' });
+  const auth = await authorise(req);
+  if (!auth.ok) return json(auth.status, { error: auth.error });
 
   const store = registrations();
   const url = new URL(req.url);
@@ -67,13 +104,15 @@ export default async (req) => {
 
   return json(200, {
     count: rows.length,
-    registrations: rows.map(({ name, phone, createdAt, lastLogin, logins }) => ({
+    feedbackCount: rows.filter((r) => r.feedback).length,
+    registrations: rows.map(({ name, phone, createdAt, lastLogin, logins, feedback }) => ({
       name,
       phone,
       phonePretty: formatPhone(phone),
       createdAt,
       lastLogin,
       logins: logins ?? 1,
+      feedback: feedback ?? null,
     })),
   });
 };

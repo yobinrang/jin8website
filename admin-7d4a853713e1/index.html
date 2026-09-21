@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <link rel="icon" type="image/png" sizes="512x512" href="../assets/favicon.png">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Cormorant+SC:wght@400&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Cormorant+SC:wght@400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root { --cream: #FAF0C8; --gold: #C9A961; --rule: rgba(201,169,97,0.18); }
@@ -15,10 +15,11 @@
   .page { max-width: 820px; margin: 0 auto; padding: 48px 20px 80px; }
   [hidden] { display: none !important; }
   h1 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 34px; letter-spacing: -0.01em; }
-  h1 em { font-style: italic; color: var(--gold); }
+  h1 em, h2 em { font-style: italic; color: var(--gold); }
+  h2 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 26px; margin: 44px 0 14px; }
   .sub { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); opacity: 0.8; margin-top: 8px; }
   .bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 28px 0 14px; }
-  input[type=password] { background: transparent; border: none; border-bottom: 1px solid rgba(250,240,200,0.25); padding: 9px 2px; color: var(--cream); font-family: 'EB Garamond', serif; font-size: 16px; outline: none; min-width: 260px; border-radius: 0; }
+  input[type=password] { background: transparent; border: none; border-bottom: 1px solid rgba(250,240,200,0.25); padding: 9px 2px; color: var(--cream); font-family: 'EB Garamond', serif; font-size: 18px; letter-spacing: 0.2em; outline: none; min-width: 220px; border-radius: 0; }
   input:focus { border-color: var(--gold); }
   button { background: transparent; color: var(--cream); border: 1px solid var(--gold); padding: 9px 18px; font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; cursor: pointer; border-radius: 0; transition: all 0.25s; }
   button:hover { background: var(--gold); color: #2a0606; }
@@ -41,6 +42,14 @@
   td.a button { padding: 5px 10px; font-size: 9px; }
   tr.new td { background: rgba(201,169,97,0.07); }
   .empty { text-align: center; font-style: italic; opacity: 0.5; padding: 36px 0; }
+  .fb { border-top: 1px solid var(--rule); padding: 18px 0; }
+  .fb-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .fb-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; }
+  .fb-when { font-family: 'Cormorant SC', serif; font-size: 9.5px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); opacity: 0.55; }
+  .fb-scores { display: flex; gap: 18px; flex-wrap: wrap; margin: 8px 0 6px; font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); opacity: 0.85; }
+  .fb-scores b { font-family: 'Cormorant Garamond', serif; font-size: 16px; letter-spacing: 0; color: var(--cream); }
+  .fb-note { font-size: 15px; line-height: 1.55; opacity: 0.8; margin-top: 6px; }
+  .fb-note span { font-family: 'Cormorant SC', serif; font-size: 9.5px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); opacity: 0.7; margin-right: 8px; }
   @media (max-width: 640px) { td.t.last, th.last { display: none; } }
 </style>
 </head>
@@ -50,11 +59,11 @@
   <p class="sub">Jin 8 · Thursday 24 September</p>
 
   <div class="bar">
-    <input id="key" type="password" placeholder="Admin key" autocomplete="off">
-    <button id="load">Load</button>
+    <input id="key" type="password" inputmode="numeric" placeholder="Admin PIN" autocomplete="off">
+    <button id="load">Open</button>
     <button id="refresh" class="quiet" hidden>Refresh</button>
     <button id="csv" class="quiet" hidden>Copy CSV</button>
-    <button id="forget" class="quiet" hidden>Forget key</button>
+    <button id="forget" class="quiet" hidden>Lock</button>
   </div>
   <p class="msg" id="msg"></p>
 
@@ -68,7 +77,12 @@
       <tbody id="rows"></tbody>
     </table>
     <p class="empty" id="empty" hidden>Nobody yet.</p>
-    <p class="note">Refreshes itself every 20 seconds while open. A brand-new registration can take up to a minute to appear in this list (the store’s listing is eventually consistent) — the registration itself is saved instantly.</p>
+
+    <h2 id="fb-heading"><em id="fb-count">0</em> feedback</h2>
+    <div id="fb-list"></div>
+    <p class="empty" id="fb-empty">No feedback yet.</p>
+
+    <p class="note">Refreshes itself every 20 seconds while open. Registrations appear here the moment they happen.</p>
   </div>
 </div>
 
@@ -78,6 +92,7 @@
   var keyInput = $('key'), msg = $('msg'), out = $('out'), rows = $('rows');
   var data = [], seen = {}, timer = null;
   var REFRESH_MS = 20000;
+  var AREAS = [['drinks', 'Drinks'], ['service', 'Service'], ['venue', 'Venue & ops']];
 
   try { var saved = sessionStorage.getItem('jin8_admin_key'); if (saved) keyInput.value = saved; } catch (e) {}
 
@@ -91,8 +106,8 @@
 
   function load(quiet) {
     var k = key();
-    if (!k) { note('Enter the admin key.', true); return; }
-    if (!quiet) note('Loading…');
+    if (!k) { note('Enter the admin PIN.', true); return; }
+    if (!quiet) note('Opening…');
     return fetch('/api/admin', { headers: { 'x-admin-key': k }, cache: 'no-store' })
       .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
       .then(function (res) {
@@ -136,6 +151,39 @@
       a.appendChild(del);
       rows.appendChild(tr);
     });
+
+    // Feedback
+    var withFb = data.filter(function (r) { return r.feedback; });
+    $('fb-count').textContent = withFb.length;
+    $('fb-empty').hidden = withFb.length > 0;
+    var list = $('fb-list'); list.textContent = '';
+    withFb.sort(function (a, b) { return a.feedback.submittedAt < b.feedback.submittedAt ? 1 : -1; }).forEach(function (r) {
+      var f = r.feedback;
+      var box = document.createElement('div'); box.className = 'fb';
+      var head = document.createElement('div'); head.className = 'fb-head';
+      var nm = document.createElement('span'); nm.className = 'fb-name'; nm.textContent = r.name + ' · ' + (r.phonePretty || r.phone);
+      var wh = document.createElement('span'); wh.className = 'fb-when'; wh.textContent = fmt(f.submittedAt);
+      head.appendChild(nm); head.appendChild(wh); box.appendChild(head);
+      var sc = document.createElement('div'); sc.className = 'fb-scores';
+      AREAS.forEach(function (a) {
+        var v = f[a[0]] && f[a[0]].rating;
+        var s = document.createElement('span'); s.innerHTML = a[1] + ' <b>' + (v ? v + '/5' : '—') + '</b>'; sc.appendChild(s);
+      });
+      box.appendChild(sc);
+      AREAS.forEach(function (a) {
+        var n = f[a[0]] && f[a[0]].note;
+        if (!n) return;
+        var p = document.createElement('p'); p.className = 'fb-note';
+        var lab = document.createElement('span'); lab.textContent = a[1]; p.appendChild(lab); p.appendChild(document.createTextNode(n));
+        box.appendChild(p);
+      });
+      if (f.other) {
+        var p2 = document.createElement('p'); p2.className = 'fb-note';
+        var lab2 = document.createElement('span'); lab2.textContent = 'Other'; p2.appendChild(lab2); p2.appendChild(document.createTextNode(f.other));
+        box.appendChild(p2);
+      }
+      list.appendChild(box);
+    });
   }
 
   $('load').addEventListener('click', function () { load(); });
@@ -143,12 +191,15 @@
   keyInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') load(); });
   $('forget').addEventListener('click', function () {
     try { sessionStorage.removeItem('jin8_admin_key'); } catch (e) {}
-    keyInput.value = ''; out.hidden = true; $('refresh').hidden = true; $('csv').hidden = true; $('forget').hidden = true; stop(); note('Key forgotten.');
+    keyInput.value = ''; out.hidden = true; $('refresh').hidden = true; $('csv').hidden = true; $('forget').hidden = true; stop(); note('Locked.');
   });
   $('csv').addEventListener('click', function () {
-    var lines = [['Name', 'Mobile', 'Registered', 'Last seen', 'Logins']].concat(
-      data.map(function (r) { return [r.name, r.phone, r.createdAt, r.lastLogin, r.logins]; })
-    ).map(function (row) { return row.map(function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }).join(','); }).join('\n');
+    var head = ['Name', 'Mobile', 'Registered', 'Last seen', 'Logins', 'Drinks rating', 'Drinks note', 'Service rating', 'Service note', 'Venue rating', 'Venue note', 'Other feedback', 'Feedback sent'];
+    var lines = [head].concat(data.map(function (r) {
+      var f = r.feedback || {};
+      var g = function (a, k) { return f[a] ? (f[a][k] == null ? '' : f[a][k]) : ''; };
+      return [r.name, r.phone, r.createdAt, r.lastLogin, r.logins, g('drinks', 'rating'), g('drinks', 'note'), g('service', 'rating'), g('service', 'note'), g('venue', 'rating'), g('venue', 'note'), f.other || '', f.submittedAt || ''];
+    })).map(function (row) { return row.map(function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }).join(','); }).join('\n');
     navigator.clipboard.writeText(lines).then(function () { note('Copied ' + data.length + ' rows as CSV.'); }, function () { note('Copy failed — select the table and copy manually.', true); });
   });
 

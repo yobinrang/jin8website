@@ -37,6 +37,9 @@ export default async (req) => {
     existing.lastLogin = now;
     existing.logins = (existing.logins ?? 0) + 1;
     await store.setJSON(phone, existing);
+    // Idempotent: makes sure records created before the index existed (or
+    // whose index write once failed) become visible to the admin list.
+    try { await addToIndex(phone); } catch (e) { console.error('index touch failed', phone, e); }
     return json(200, { ok: true, name: existing.name, returning: true }, {
       'set-cookie': makeSessionCookie(phone),
     });

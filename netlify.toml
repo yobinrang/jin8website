@@ -20,9 +20,15 @@
   status = 302
   force = true
 
+# The invitation used to live at the long hex address; keep it working.
+[[redirects]]
+  from = "/soft-opening-bb877a1e5e6b/*"
+  to = "/softopen/:splat"
+  status = 301
+
 # Secret pages: never indexed, never cached.
 [[headers]]
-  for = "/soft-opening-bb877a1e5e6b/*"
+  for = "/softopen/*"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"
     Cache-Control = "no-store"

@@ -26,6 +26,12 @@
   to = "/softopen/:splat"
   status = 301
 
+# The admin page used to live at a hex address; keep old bookmarks working.
+[[redirects]]
+  from = "/admin-7d4a853713e1/*"
+  to = "/softopen_admin/:splat"
+  status = 301
+
 # Secret pages: never indexed, never cached.
 [[headers]]
   for = "/softopen/*"
@@ -34,7 +40,7 @@
     Cache-Control = "no-store"
 
 [[headers]]
-  for = "/admin-7d4a853713e1/*"
+  for = "/softopen_admin/*"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"
     Cache-Control = "no-store"

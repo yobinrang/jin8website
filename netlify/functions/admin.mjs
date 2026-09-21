@@ -11,11 +11,11 @@ import { readIndex, removeFromIndex, reconcileIndex } from '../lib/index.mjs';
 // DELETE /api/admin?phone=+61…   removes one registration.
 // GET /api/admin?diag=1&probe=+61…   diagnostic: what each store can see.
 
-// Two credentials are accepted in the x-admin-key header:
-//   • ADMIN_KEY — the long random key (no lockout)
-//   • ADMIN_PIN — Robin's short PIN, protected by a global lockout:
-//     5 wrong attempts → PIN sign-in frozen for 15 minutes (the long key
-//     still works during a freeze).
+// The credential is ADMIN_PIN (Robin's PIN), sent in the x-admin-key header.
+// Brute-force protection is per device: 5 wrong attempts from one IP freeze
+// that IP for 15 minutes; other devices are unaffected. (If ADMIN_KEY is set
+// to a long random value, it is also accepted, without lockout; a short
+// ADMIN_KEY is ignored so a 6-digit value can never bypass the lockout.)
 const LOCK_MAX = 5;
 const LOCK_MS = 15 * 60 * 1000;
 
@@ -24,37 +24,46 @@ async function lockStore() {
   return getStore({ name: 'admin-lock', region: 'ap-southeast-2', consistency: 'strong' });
 }
 
-async function authorise(req) {
+// Netlify passes the real client IP as context.ip (headers are the fallback).
+function clientIp(req, context) {
+  return (context && context.ip)
+    || req.headers.get('x-nf-client-connection-ip')
+    || (req.headers.get('x-forwarded-for') || '').split(',')[0].trim()
+    || 'unknown';
+}
+
+async function authorise(req, context) {
   const given = req.headers.get('x-admin-key') || '';
   const key = process.env.ADMIN_KEY || '';
-  if (key.length >= 8 && given && safeEqual(given, key)) return { ok: true };
+  if (key.length >= 16 && given && safeEqual(given, key)) return { ok: true };
 
   const pin = process.env.ADMIN_PIN || '';
   if (!pin || !given) return { ok: false, status: 401, error: 'Unauthorised.' };
 
   const store = await lockStore();
-  const lock = (await store.get('pin', { type: 'json' })) || { fails: 0, until: 0 };
+  const lockKey = 'ip:' + clientIp(req, context);
+  const lock = (await store.get(lockKey, { type: 'json' })) || { fails: 0, until: 0 };
   const now = Date.now();
   if (lock.until > now) {
     const mins = Math.ceil((lock.until - now) / 60000);
-    return { ok: false, status: 429, error: `Too many attempts. Try again in ${mins} min.` };
+    return { ok: false, status: 429, error: `Too many attempts from this device. Try again in ${mins} min.` };
   }
   if (safeEqual(given, pin)) {
-    if (lock.fails) await store.setJSON('pin', { fails: 0, until: 0 });
+    if (lock.fails) await store.setJSON(lockKey, { fails: 0, until: 0 });
     return { ok: true };
   }
   const fails = (lock.fails || 0) + 1;
   if (fails >= LOCK_MAX) {
-    await store.setJSON('pin', { fails: 0, until: now + LOCK_MS });
-    return { ok: false, status: 429, error: 'Too many attempts. PIN locked for 15 minutes.' };
+    await store.setJSON(lockKey, { fails: 0, until: now + LOCK_MS });
+    return { ok: false, status: 429, error: 'Too many attempts. This device is locked for 15 minutes.' };
   }
-  await store.setJSON('pin', { fails, until: 0 });
+  await store.setJSON(lockKey, { fails, until: 0 });
   const left = LOCK_MAX - fails;
   return { ok: false, status: 401, error: `Wrong PIN. ${left} attempt${left === 1 ? '' : 's'} left.` };
 }
 
-export default async (req) => {
-  const auth = await authorise(req);
+export default async (req, context) => {
+  const auth = await authorise(req, context);
   if (!auth.ok) return json(auth.status, { error: auth.error });
 
   const store = registrations();
@@ -70,6 +79,12 @@ export default async (req) => {
       ? await Promise.all([pinned.get(probe, { type: 'json' }), dflt.get(probe, { type: 'json' })])
       : [null, null];
     return json(200, {
+      ip: clientIp(req, context),
+      ipSources: {
+        contextIp: (context && context.ip) || null,
+        nfHeader: req.headers.get('x-nf-client-connection-ip'),
+        forwardedFor: req.headers.get('x-forwarded-for'),
+      },
       index: idx.phones,
       pinned: { region: 'ap-southeast-2', listed: lp.blobs.map((b) => b.key), probeFound: !!gp },
       default: { region: 'default (us-east-2)', listed: ld.blobs.map((b) => b.key), probeFound: !!gd },

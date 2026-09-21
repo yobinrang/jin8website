@@ -137,9 +137,15 @@
   .name { font-family: 'Cormorant Garamond', serif; font-size: 23px; font-weight: 400; line-height: 1.15; letter-spacing: -0.005em; flex: 1 1 auto; }
   .name em { font-style: italic; color: var(--gold); }
   .price { font-family: 'Cormorant Garamond', serif; font-size: 17px; color: var(--gold); opacity: 0.9; flex: 0 0 auto; white-space: nowrap; margin-left: 12px; }
+  .cn { margin-top: 5px; padding-left: 34px; display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; color: var(--gold); }
+  .cn .hanzi { font-family: 'Noto Serif SC', serif; font-weight: 400; font-size: 17px; letter-spacing: 0.1em; }
+  .cn .pinyin { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15.5px; opacity: 0.75; }
+  .tag { margin-top: 11px; padding-left: 34px; font-family: 'Cormorant SC', serif; font-size: 9.5px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); opacity: 0.6; }
+  .desc { margin-top: 6px; padding-left: 34px; font-size: 15px; line-height: 1.62; opacity: 0.72; }
   .pour { font-size: 14.5px; line-height: 1.55; font-style: italic; opacity: 0.62; margin-top: 7px; padding-left: 34px; }
   .strength { margin-top: 9px; padding-left: 34px; font-family: 'Cormorant SC', serif; font-size: 9.5px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); opacity: 0.55; }
-  .items.plain .pour, .items.plain .strength { padding-left: 0; }
+  .items.plain .cn, .items.plain .tag, .items.plain .desc, .items.plain .pour, .items.plain .strength { padding-left: 0; }
+  .placeholder { text-align: center; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15.5px; opacity: 0.5; padding: 24px 0 4px; border-top: 1px solid var(--rule); }
 
   .strip {
     text-align: center; padding: 34px 12px; margin: 8px 0 56px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
@@ -270,7 +276,8 @@
     if (menu.pricingNote) root.appendChild(el('span', 'pricing-note', menu.pricingNote));
 
     (menu.sections || []).forEach(function (s) {
-      if (!s.items || !s.items.length) return;              // hidden until it has items
+      var hasItems = s.items && s.items.length;
+      if (!hasItems && !s.placeholder) return;              // nothing to show yet
       var sec = el('section'); sec.id = 'menu-' + s.id;
       var head = el('div', 'section-head');
       if (s.label) head.appendChild(el('div', 'section-label', s.label));
@@ -278,6 +285,12 @@
       head.appendChild(h2);
       if (s.sub) head.appendChild(el('p', 'sub', s.sub));
       sec.appendChild(head);
+
+      if (!hasItems) {
+        sec.appendChild(el('p', 'placeholder', s.placeholder));
+        root.appendChild(sec);
+        return;
+      }
 
       var ul = el('ul', 'items' + (s.numbered ? '' : ' plain'));
       s.items.forEach(function (it) {
@@ -288,6 +301,14 @@
         row.appendChild(name);
         if (it.price) row.appendChild(el('span', 'price', it.price));
         li.appendChild(row);
+        if (it.cn || it.pinyin) {
+          var cn = el('p', 'cn');
+          if (it.cn) cn.appendChild(el('span', 'hanzi', it.cn));
+          if (it.pinyin) cn.appendChild(el('span', 'pinyin', it.pinyin));
+          li.appendChild(cn);
+        }
+        if (it.tag) li.appendChild(el('p', 'tag', it.tag));
+        if (it.desc) li.appendChild(el('p', 'desc', it.desc));
         if (it.pour) li.appendChild(el('p', 'pour', it.pour));
         if (it.strength) li.appendChild(el('p', 'strength', it.strength));
         ul.appendChild(li);

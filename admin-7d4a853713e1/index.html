@@ -17,17 +17,20 @@
   h1 { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 34px; letter-spacing: -0.01em; }
   h1 em { font-style: italic; color: var(--gold); }
   .sub { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); opacity: 0.8; margin-top: 8px; }
-  .bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 28px 0 22px; }
+  .bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 28px 0 14px; }
   input[type=password] { background: transparent; border: none; border-bottom: 1px solid rgba(250,240,200,0.25); padding: 9px 2px; color: var(--cream); font-family: 'EB Garamond', serif; font-size: 16px; outline: none; min-width: 260px; border-radius: 0; }
   input:focus { border-color: var(--gold); }
   button { background: transparent; color: var(--cream); border: 1px solid var(--gold); padding: 9px 18px; font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; cursor: pointer; border-radius: 0; transition: all 0.25s; }
   button:hover { background: var(--gold); color: #2a0606; }
   button.quiet { border-color: rgba(201,169,97,0.35); opacity: 0.7; }
   button.danger:hover { background: #8B0000; border-color: #8B0000; color: var(--cream); }
-  .msg { font-style: italic; opacity: 0.7; margin: 10px 0; }
+  .msg { font-style: italic; opacity: 0.7; margin: 8px 0; min-height: 1.4em; }
   .msg.err { color: #E8B4A0; }
-  .count { font-family: 'Cormorant Garamond', serif; font-size: 22px; margin: 8px 0 18px; }
+  .meta { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin: 8px 0 18px; }
+  .count { font-family: 'Cormorant Garamond', serif; font-size: 22px; }
   .count em { color: var(--gold); font-style: italic; }
+  .stamp { font-family: 'Cormorant SC', serif; font-size: 9.5px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); opacity: 0.55; }
+  .note { font-size: 13px; font-style: italic; opacity: 0.45; margin-top: 22px; line-height: 1.5; }
   table { width: 100%; border-collapse: collapse; }
   th, td { text-align: left; padding: 12px 10px 12px 0; border-bottom: 1px solid var(--rule); vertical-align: top; font-size: 15px; }
   th { font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); opacity: 0.8; font-weight: 400; }
@@ -36,7 +39,9 @@
   td.t { opacity: 0.6; font-size: 13.5px; white-space: nowrap; }
   td.a { text-align: right; }
   td.a button { padding: 5px 10px; font-size: 9px; }
-  @media (max-width: 640px) { td.t.last { display: none; } th.last { display: none; } }
+  tr.new td { background: rgba(201,169,97,0.07); }
+  .empty { text-align: center; font-style: italic; opacity: 0.5; padding: 36px 0; }
+  @media (max-width: 640px) { td.t.last, th.last { display: none; } }
 </style>
 </head>
 <body>
@@ -47,17 +52,23 @@
   <div class="bar">
     <input id="key" type="password" placeholder="Admin key" autocomplete="off">
     <button id="load">Load</button>
+    <button id="refresh" class="quiet" hidden>Refresh</button>
     <button id="csv" class="quiet" hidden>Copy CSV</button>
     <button id="forget" class="quiet" hidden>Forget key</button>
   </div>
-  <p class="msg" id="msg" hidden></p>
+  <p class="msg" id="msg"></p>
 
   <div id="out" hidden>
-    <p class="count"><em id="count">0</em> registered</p>
+    <div class="meta">
+      <p class="count"><em id="count">0</em> registered</p>
+      <p class="stamp" id="stamp"></p>
+    </div>
     <table>
       <thead><tr><th>Name</th><th>Mobile</th><th>Registered</th><th class="last">Last seen</th><th></th></tr></thead>
       <tbody id="rows"></tbody>
     </table>
+    <p class="empty" id="empty" hidden>Nobody yet.</p>
+    <p class="note">Refreshes itself every 20 seconds while open. A brand-new registration can take up to a minute to appear in this list (the store’s listing is eventually consistent) — the registration itself is saved instantly.</p>
   </div>
 </div>
 
@@ -65,40 +76,51 @@
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var keyInput = $('key'), msg = $('msg'), out = $('out'), rows = $('rows');
-  var data = [];
+  var data = [], seen = {}, timer = null;
+  var REFRESH_MS = 20000;
 
   try { var saved = sessionStorage.getItem('jin8_admin_key'); if (saved) keyInput.value = saved; } catch (e) {}
 
-  function note(text, isErr) { msg.textContent = text; msg.classList.toggle('err', !!isErr); msg.hidden = !text; }
+  function note(text, isErr) { msg.textContent = text || ''; msg.classList.toggle('err', !!isErr); }
   function fmt(iso) {
     if (!iso) return '';
-    var d = new Date(iso);
-    return d.toLocaleString('en-AU', { timeZone: 'Australia/Melbourne', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+    return new Date(iso).toLocaleString('en-AU', { timeZone: 'Australia/Melbourne', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
   }
+  function now() { return new Date().toLocaleTimeString('en-AU', { timeZone: 'Australia/Melbourne', hour: 'numeric', minute: '2-digit', second: '2-digit' }); }
   function key() { return keyInput.value.trim(); }
 
-  function load() {
+  function load(quiet) {
     var k = key();
     if (!k) { note('Enter the admin key.', true); return; }
-    note('Loading…');
-    fetch('/api/admin', { headers: { 'x-admin-key': k }, cache: 'no-store' })
+    if (!quiet) note('Loading…');
+    return fetch('/api/admin', { headers: { 'x-admin-key': k }, cache: 'no-store' })
       .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
       .then(function (res) {
-        if (!res.ok) { note(res.body.error || 'Unauthorised.', true); out.hidden = true; return; }
+        if (!res.ok) { note(res.body.error || 'Unauthorised.', true); out.hidden = true; stop(); return; }
         try { sessionStorage.setItem('jin8_admin_key', k); } catch (e) {}
-        data = res.body.registrations || [];
-        render();
-        note('');
-        $('csv').hidden = false; $('forget').hidden = false; out.hidden = false;
+        var fresh = res.body.registrations || [];
+        var added = fresh.filter(function (r) { return data.length && !seen[r.phone]; }).length;
+        data = fresh; fresh.forEach(function (r) { seen[r.phone] = true; });
+        render(added);
+        note(added ? added + ' new since last refresh.' : '');
+        $('refresh').hidden = false; $('csv').hidden = false; $('forget').hidden = false; out.hidden = false;
+        start();
       })
       .catch(function () { note('Could not reach the server.', true); });
   }
 
-  function render() {
+  function start() { stop(); timer = setInterval(function () { if (!document.hidden) load(true); }, REFRESH_MS); }
+  function stop() { if (timer) { clearInterval(timer); timer = null; } }
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && !out.hidden) load(true); });
+
+  function render(added) {
     $('count').textContent = data.length;
+    $('stamp').textContent = 'Updated ' + now();
+    $('empty').hidden = data.length > 0;
     rows.textContent = '';
-    data.forEach(function (r) {
+    data.forEach(function (r, i) {
       var tr = document.createElement('tr');
+      if (added && i >= data.length - added) tr.className = 'new';
       function td(cls, text) { var c = document.createElement('td'); if (cls) c.className = cls; c.textContent = text; tr.appendChild(c); return c; }
       td('n', r.name);
       td('p', r.phonePretty || r.phone);
@@ -109,16 +131,20 @@
       del.addEventListener('click', function () {
         if (!confirm('Remove ' + r.name + ' (' + (r.phonePretty || r.phone) + ')? They can register again.')) return;
         fetch('/api/admin?phone=' + encodeURIComponent(r.phone), { method: 'DELETE', headers: { 'x-admin-key': key() } })
-          .then(function (res) { if (res.ok) load(); else note('Could not remove.', true); });
+          .then(function (res) { if (res.ok) { delete seen[r.phone]; load(); } else note('Could not remove.', true); });
       });
       a.appendChild(del);
       rows.appendChild(tr);
     });
   }
 
-  $('load').addEventListener('click', load);
+  $('load').addEventListener('click', function () { load(); });
+  $('refresh').addEventListener('click', function () { load(); });
   keyInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') load(); });
-  $('forget').addEventListener('click', function () { try { sessionStorage.removeItem('jin8_admin_key'); } catch (e) {} keyInput.value = ''; out.hidden = true; $('csv').hidden = true; $('forget').hidden = true; note('Key forgotten.'); });
+  $('forget').addEventListener('click', function () {
+    try { sessionStorage.removeItem('jin8_admin_key'); } catch (e) {}
+    keyInput.value = ''; out.hidden = true; $('refresh').hidden = true; $('csv').hidden = true; $('forget').hidden = true; stop(); note('Key forgotten.');
+  });
   $('csv').addEventListener('click', function () {
     var lines = [['Name', 'Mobile', 'Registered', 'Last seen', 'Logins']].concat(
       data.map(function (r) { return [r.name, r.phone, r.createdAt, r.lastLogin, r.logins]; })

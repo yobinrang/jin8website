@@ -86,6 +86,7 @@ export default async (req) => {
 
   return json(200, {
     guest: { name: rec.name, phone: formatPhone(rec.phone) },
+    session: { expiresAt: session.e * 1000 },   // ms epoch; the page signs itself out at this moment
     event: EVENT,
     menu: MENU,
   });

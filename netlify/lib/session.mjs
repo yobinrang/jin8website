@@ -5,7 +5,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 // forged or altered client-side.
 
 const COOKIE = 'jin8_invite';
-const TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
+export const TTL_SECONDS = 5 * 60; // 5 minutes from login, then the guest re-enters number + PIN
 
 function secret() {
   const s = process.env.SESSION_SECRET;
@@ -44,7 +44,11 @@ export function readSession(req) {
 
   try {
     const data = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
-    if (!data.p || !data.e || data.e < Date.now() / 1000) return null;
+    const now = Date.now() / 1000;
+    if (!data.p || !data.e || data.e < now) return null;
+    // Reject sessions issued under a longer TTL (e.g. cookies from before the
+    // 5-minute rule) so shortening the TTL takes effect immediately.
+    if (data.e - now > TTL_SECONDS + 5) return null;
     return data;
   } catch {
     return null;

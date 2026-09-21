@@ -22,6 +22,7 @@
     --ink: #160606;
     --gold: #C9A961;
     --rule: rgba(201, 169, 97, 0.18);
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   html { -webkit-text-size-adjust: 100%; }
@@ -54,7 +55,7 @@
   [hidden] { display: none !important; }
 
   /* ── HEADER ── */
-  .head { text-align: center; margin-bottom: 44px; animation: fadeUp 1.2s cubic-bezier(0.16,1,0.3,1) both; }
+  .head { text-align: center; margin-bottom: 44px; animation: fadeUp 1.2s var(--ease) both; }
   .logo {
     width: 84px; height: auto; display: block; margin: 0 auto 28px;
     filter: drop-shadow(0 0 18px rgba(255, 200, 100, 0.28)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.45));
@@ -72,33 +73,42 @@
   .loading { text-align: center; font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); opacity: 0.5; padding: 40px 0; }
 
   /* ── GATE ── */
-  .gate { animation: fadeUp 0.8s cubic-bezier(0.16,1,0.3,1) both; }
-  .gate-lede { text-align: center; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 16px; line-height: 1.55; opacity: 0.7; max-width: 400px; margin: 0 auto 30px; }
+  .gate { animation: fadeUp 0.8s var(--ease) both; }
+  .gate-lede { text-align: center; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 17px; line-height: 1.5; opacity: 0.75; max-width: 400px; margin: 0 auto 28px; min-height: 1.5em; }
   .gate form { display: flex; flex-direction: column; gap: 18px; max-width: 400px; margin: 0 auto; }
+  .step { display: flex; flex-direction: column; gap: 18px; animation: fadeUp 0.5s var(--ease) both; }
   .gate label { display: block; }
   .gate .lbl { display: block; font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--gold); opacity: 0.75; margin-bottom: 4px; }
   .gate input {
     width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(250,240,200,0.25);
-    padding: 10px 2px; color: var(--cream); font-family: 'EB Garamond', serif; font-size: 17px; outline: none;
-    transition: border-color 0.3s; border-radius: 0;
+    padding: 10px 2px; color: var(--cream); font-family: 'EB Garamond', serif; font-size: 18px; outline: none;
+    transition: border-color 0.3s; border-radius: 0; letter-spacing: 0.02em;
   }
-  .gate input::placeholder { color: rgba(250,240,200,0.35); font-style: italic; }
+  .gate input::placeholder { color: rgba(250,240,200,0.35); font-style: italic; letter-spacing: 0; }
   .gate input:focus { border-color: var(--gold); }
-  .gate .hint { font-size: 12.5px; font-style: italic; opacity: 0.45; margin-top: 6px; }
-  .gate button {
+  .gate .hint { font-size: 12.5px; font-style: italic; opacity: 0.45; margin-top: 6px; min-height: 1em; }
+  .phone-echo { text-align: center; font-family: 'Cormorant Garamond', serif; font-size: 20px; letter-spacing: 0.02em; margin-bottom: 2px; }
+  .phone-echo .link {
+    background: none; border: none; color: var(--gold); cursor: pointer; padding: 0; margin-left: 12px;
+    font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
+    border-bottom: 1px solid transparent; transition: border-color 0.25s; vertical-align: middle;
+  }
+  .phone-echo .link:hover { border-bottom-color: var(--gold); }
+  .gate button[type=submit] {
     margin: 10px auto 0; padding: 13px 34px; font-family: 'Cormorant SC', serif; font-size: 11px; letter-spacing: 0.32em;
     text-transform: uppercase; background: transparent; color: var(--cream); border: 1px solid var(--gold);
-    cursor: pointer; transition: all 0.3s; border-radius: 0;
+    cursor: pointer; transition: all 0.3s; border-radius: 0; min-width: 160px;
   }
-  .gate button:hover { background: var(--gold); color: #2a0606; }
-  .gate button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .gate button[type=submit]:hover { background: var(--gold); color: #2a0606; }
+  .gate button[type=submit]:disabled { opacity: 0.4; cursor: not-allowed; }
   .err { text-align: center; color: #E8B4A0; font-style: italic; font-size: 14.5px; line-height: 1.5; padding: 4px 0; }
-  .gate-fine { text-align: center; font-size: 12.5px; font-style: italic; opacity: 0.4; margin-top: 26px; line-height: 1.55; }
+  .gate-fine { text-align: center; font-size: 12.5px; font-style: italic; opacity: 0.4; margin-top: 26px; line-height: 1.55; min-height: 1.5em; }
 
   /* ── INSIDE ── */
-  .inside { animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) both; }
-  .welcome { text-align: center; font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; margin-bottom: 36px; }
+  .inside { animation: fadeUp 0.9s var(--ease) both; }
+  .welcome { text-align: center; font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; margin-bottom: 10px; }
   .welcome em { font-style: italic; color: var(--gold); }
+  .session-note { text-align: center; font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); opacity: 0.45; margin-bottom: 40px; }
 
   section { margin-bottom: 56px; }
   .section-head { text-align: center; margin-bottom: 26px; }
@@ -124,19 +134,42 @@
   .notes li { position: relative; padding: 9px 0 9px 22px; font-size: 15.5px; line-height: 1.6; opacity: 0.78; }
   .notes li::before { content: '晋'; position: absolute; left: 0; top: 11px; font-family: 'Noto Serif SC', serif; font-size: 11px; color: var(--gold); opacity: 0.7; }
 
-  /* Menu */
-  .pricing-note {
-    display: block; width: max-content; max-width: 100%; margin: 0 auto 30px; font-family: 'Cormorant SC', serif; font-size: 10px;
-    letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); opacity: 0.8; padding: 9px 16px;
-    border: 1px solid rgba(201, 169, 97, 0.35); border-radius: 2px; text-align: center;
+  /* ── MENU ACCORDION ── */
+  .menu-acc { border-top: 1px solid var(--rule); }
+  .acc { border-bottom: 1px solid var(--rule); scroll-margin-top: 18px; }
+  .acc-btn {
+    width: 100%; background: none; border: none; color: inherit; text-align: left; cursor: pointer; font-family: inherit;
+    padding: 24px 0; display: grid; grid-template-columns: 1fr auto; grid-template-areas: "label icon" "title icon" "sub icon";
+    align-items: center; column-gap: 18px; -webkit-tap-highlight-color: transparent;
   }
-  .items { list-style: none; border-top: 1px solid var(--rule); }
+  .acc-label { grid-area: label; font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); opacity: 0.8; margin-bottom: 6px; }
+  .acc-title { grid-area: title; font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; line-height: 1.05; letter-spacing: -0.01em; color: var(--cream); transition: color 0.3s; }
+  .acc-title em { font-style: italic; color: var(--gold); }
+  .acc-sub { grid-area: sub; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15px; opacity: 0.6; margin-top: 6px; }
+  .acc-icon {
+    grid-area: icon; width: 40px; height: 40px; border: 1px solid rgba(201,169,97,0.4); border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; line-height: 1; color: var(--gold);
+    transition: transform 0.5s var(--ease), background 0.3s, color 0.3s;
+  }
+  .acc-btn:hover .acc-icon { background: rgba(201,169,97,0.12); }
+  .acc.open .acc-icon { transform: rotate(45deg); background: var(--gold); color: #2a0606; }
+  .acc-panel { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 0.6s var(--ease), opacity 0.45s ease; }
+  .acc.open .acc-panel { grid-template-rows: 1fr; opacity: 1; }
+  .acc-inner { overflow: hidden; min-height: 0; }
+  .acc-inner .items { border-top: 1px solid var(--rule); margin-bottom: 10px; }
+  .acc-inner .item:last-child { border-bottom: none; }
+  .acc-inner .placeholder { border-top: 1px solid var(--rule); padding: 22px 0 26px; }
+
+  /* Items */
+  .items { list-style: none; }
   .item { padding: 22px 0 20px; border-bottom: 1px solid var(--rule); }
   .item-row { display: flex; align-items: baseline; gap: 14px; }
   .num { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 12px; letter-spacing: 0.1em; opacity: 0.4; flex: 0 0 auto; min-width: 20px; }
   .name { font-family: 'Cormorant Garamond', serif; font-size: 23px; font-weight: 400; line-height: 1.15; letter-spacing: -0.005em; flex: 1 1 auto; }
   .name em { font-style: italic; color: var(--gold); }
-  .price { font-family: 'Cormorant Garamond', serif; font-size: 17px; color: var(--gold); opacity: 0.9; flex: 0 0 auto; white-space: nowrap; margin-left: 12px; }
+  .price { font-family: 'Cormorant Garamond', serif; font-size: 17px; color: var(--gold); opacity: 0.9; flex: 0 0 auto; white-space: nowrap; margin-left: 12px; min-width: 2.2em; text-align: right; }
+  .price.ph { opacity: 0.3; }
   .cn { margin-top: 5px; padding-left: 34px; display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; color: var(--gold); }
   .cn .hanzi { font-family: 'Noto Serif SC', serif; font-weight: 400; font-size: 17px; letter-spacing: 0.1em; }
   .cn .pinyin { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15.5px; opacity: 0.75; }
@@ -145,7 +178,7 @@
   .pour { font-size: 14.5px; line-height: 1.55; font-style: italic; opacity: 0.62; margin-top: 7px; padding-left: 34px; }
   .strength { margin-top: 9px; padding-left: 34px; font-family: 'Cormorant SC', serif; font-size: 9.5px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); opacity: 0.55; }
   .items.plain .cn, .items.plain .tag, .items.plain .desc, .items.plain .pour, .items.plain .strength { padding-left: 0; }
-  .placeholder { text-align: center; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15.5px; opacity: 0.5; padding: 24px 0 4px; border-top: 1px solid var(--rule); }
+  .placeholder { text-align: center; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 15.5px; opacity: 0.5; }
 
   .strip {
     text-align: center; padding: 34px 12px; margin: 8px 0 56px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
@@ -167,10 +200,15 @@
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 
+  @media (prefers-reduced-motion: reduce) {
+    .acc-panel, .acc-icon, .head, .gate, .inside, .step { transition: none; animation: none; }
+  }
+
   @media (min-width: 600px) {
     .page { padding: 80px 32px 96px; }
     .name { font-size: 25px; }
     .detail .k { flex-basis: 96px; }
+    .acc-title { font-size: 36px; }
   }
 </style>
 </head>
@@ -189,32 +227,43 @@
 
   <!-- ══ GATE ══ -->
   <section class="gate" id="gate" hidden>
-    <p class="gate-lede">Tell us who you are and we’ll open the door. Your mobile number is your key — choose a passcode, and use the same one next time.</p>
+    <p class="gate-lede" id="gate-lede">Enter your mobile number and we’ll open the door.</p>
 
-    <form id="gate-form" novalidate>
-      <label>
-        <span class="lbl">Full name</span>
-        <input name="name" type="text" autocomplete="name" autocapitalize="words" placeholder="Your name">
-      </label>
-      <label>
-        <span class="lbl">Mobile number</span>
-        <input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="04xx xxx xxx" required>
-        <p class="hint">Not an Australian number? Add the country code, e.g. +86 …</p>
-      </label>
-      <label>
-        <span class="lbl">Passcode</span>
-        <input name="passcode" type="password" autocomplete="current-password" minlength="4" placeholder="At least 4 characters" required>
-      </label>
+    <form id="gate-form" novalidate autocomplete="on">
+      <!-- Step 1: number -->
+      <div class="step" id="step-phone">
+        <label>
+          <span class="lbl">Mobile number</span>
+          <input name="phone" id="in-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="04xx xxx xxx">
+          <p class="hint">Not an Australian number? Add the country code, e.g. +86 …</p>
+        </label>
+      </div>
+
+      <!-- Step 2: PIN (returning) or name + new PIN (first visit) -->
+      <div class="step" id="step-auth" hidden>
+        <p class="phone-echo"><span id="phone-echo"></span><button type="button" class="link" id="change-phone">Change</button></p>
+        <label id="name-field" hidden>
+          <span class="lbl">Full name</span>
+          <input name="name" id="in-name" type="text" autocomplete="name" autocapitalize="words" placeholder="Your name">
+        </label>
+        <label>
+          <span class="lbl">PIN</span>
+          <input name="passcode" id="in-pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="At least 4 digits">
+          <p class="hint" id="pin-hint"></p>
+        </label>
+      </div>
+
       <p class="err" id="gate-err" hidden></p>
-      <button type="submit" id="gate-btn">Enter</button>
+      <button type="submit" id="gate-btn">Continue</button>
     </form>
 
-    <p class="gate-fine">First time here? Just fill it in and we’ll remember you.<br>Coming back? Number and passcode are enough.</p>
+    <p class="gate-fine" id="gate-fine">Your number is your key. First time here, we’ll ask your name and a PIN of your choosing.</p>
   </section>
 
   <!-- ══ INSIDE ══ -->
   <div class="inside" id="inside" hidden>
     <p class="welcome">Welcome, <em id="guest-name"></em>.</p>
+    <p class="session-note">Signs out after five minutes · your number and PIN bring you back</p>
 
     <section id="event">
       <div class="section-head">
@@ -230,7 +279,14 @@
       <ul class="notes" id="ev-notes"></ul>
     </section>
 
-    <div id="menu"></div>
+    <section id="menu-section">
+      <div class="section-head">
+        <div class="section-label">Soft Opening</div>
+        <h2>The <em>Menu</em></h2>
+        <p class="sub">Tap a list to open it.</p>
+      </div>
+      <div id="menu"></div>
+    </section>
 
     <div class="strip">
       "The traveller who is in no hurry <em>晋</em> arrives by candlelight, and finds the vinegar has been waiting three hundred years."
@@ -254,14 +310,29 @@
   var $ = function (id) { return document.getElementById(id); };
   var loading = $('loading'), gate = $('gate'), inside = $('inside');
   var form = $('gate-form'), err = $('gate-err'), btn = $('gate-btn');
+  var stepPhone = $('step-phone'), stepAuth = $('step-auth'), nameField = $('name-field');
+  var inPhone = $('in-phone'), inName = $('in-name'), inPin = $('in-pin');
+  var lede = $('gate-lede'), fine = $('gate-fine'), pinHint = $('pin-hint');
+
+  var state = { step: 'phone', registered: false, phone: '' };
+  var expiryTimer = null, expiresAt = 0;
+
+  var COPY = {
+    phoneLede: 'Enter your mobile number and we’ll open the door.',
+    phoneFine: 'Your number is your key. First time here, we’ll ask your name and a PIN of your choosing.',
+    backLede: 'Welcome back. Enter your PIN.',
+    backFine: 'Forgotten your PIN? Message us at hello@jin8bar.com and we’ll reset it.',
+    newLede: 'First time here. Tell us your name and choose a PIN.',
+    newHint: 'At least 4 digits — you’ll use it to come back in.',
+    newFine: 'We only use your number to recognise you. It won’t be shared.',
+    offline: 'We couldn’t reach the door just now. Please try again.',
+    expired: 'Signed out after five minutes — enter your number to come back in.'
+  };
 
   function show(el) { el.hidden = false; }
   function hide(el) { el.hidden = true; }
-
-  function showGate(message) {
-    hide(loading); hide(inside); show(gate);
-    if (message) { err.textContent = message; show(err); } else { hide(err); }
-  }
+  function setErr(m) { if (m) { err.textContent = m; show(err); } else { hide(err); } }
+  function busy(on, label) { btn.disabled = on; btn.textContent = label; }
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -270,54 +341,118 @@
     return e;
   }
 
-  function renderMenu(menu) {
-    var root = $('menu');
-    root.textContent = '';
-    if (menu.pricingNote) root.appendChild(el('span', 'pricing-note', menu.pricingNote));
-
-    (menu.sections || []).forEach(function (s) {
-      var hasItems = s.items && s.items.length;
-      if (!hasItems && !s.placeholder) return;              // nothing to show yet
-      var sec = el('section'); sec.id = 'menu-' + s.id;
-      var head = el('div', 'section-head');
-      if (s.label) head.appendChild(el('div', 'section-label', s.label));
-      var h2 = el('h2'); h2.innerHTML = s.title;            // our own data (contains <em>)
-      head.appendChild(h2);
-      if (s.sub) head.appendChild(el('p', 'sub', s.sub));
-      sec.appendChild(head);
-
-      if (!hasItems) {
-        sec.appendChild(el('p', 'placeholder', s.placeholder));
-        root.appendChild(sec);
-        return;
-      }
-
-      var ul = el('ul', 'items' + (s.numbered ? '' : ' plain'));
-      s.items.forEach(function (it) {
-        var li = el('li', 'item');
-        var row = el('div', 'item-row');
-        if (s.numbered && it.num) row.appendChild(el('span', 'num', it.num));
-        var name = el('span', 'name'); name.innerHTML = it.name;
-        row.appendChild(name);
-        if (it.price) row.appendChild(el('span', 'price', it.price));
-        li.appendChild(row);
-        if (it.cn || it.pinyin) {
-          var cn = el('p', 'cn');
-          if (it.cn) cn.appendChild(el('span', 'hanzi', it.cn));
-          if (it.pinyin) cn.appendChild(el('span', 'pinyin', it.pinyin));
-          li.appendChild(cn);
-        }
-        if (it.tag) li.appendChild(el('p', 'tag', it.tag));
-        if (it.desc) li.appendChild(el('p', 'desc', it.desc));
-        if (it.pour) li.appendChild(el('p', 'pour', it.pour));
-        if (it.strength) li.appendChild(el('p', 'strength', it.strength));
-        ul.appendChild(li);
-      });
-      sec.appendChild(ul);
-      root.appendChild(sec);
-    });
+  /* ── Gate steps ── */
+  function toPhoneStep(message) {
+    state.step = 'phone'; state.registered = false;
+    show(stepPhone); hide(stepAuth); hide(nameField);
+    inPin.value = ''; inName.value = '';
+    lede.textContent = COPY.phoneLede; fine.textContent = COPY.phoneFine; pinHint.textContent = '';
+    busy(false, 'Continue');
+    setErr(message || '');
   }
 
+  function toAuthStep(registered, prettyPhone) {
+    state.step = 'auth'; state.registered = registered;
+    hide(stepPhone); show(stepAuth);
+    $('phone-echo').textContent = prettyPhone;
+    if (registered) {
+      hide(nameField);
+      lede.textContent = COPY.backLede; pinHint.textContent = ''; fine.textContent = COPY.backFine;
+      inPin.setAttribute('autocomplete', 'current-password');
+    } else {
+      show(nameField);
+      lede.textContent = COPY.newLede; pinHint.textContent = COPY.newHint; fine.textContent = COPY.newFine;
+      inPin.setAttribute('autocomplete', 'new-password');
+    }
+    busy(false, 'Enter'); setErr('');
+    setTimeout(function () { (registered ? inPin : inName).focus(); }, 60);
+  }
+
+  function showGate(message) {
+    clearTimeout(expiryTimer); expiresAt = 0;
+    hide(loading); hide(inside); show(gate);
+    toPhoneStep(message);
+  }
+
+  /* ── Auto sign-out (5 minutes from login, set by the server) ── */
+  function expire() {
+    fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }).catch(function () {});
+    showGate(COPY.expired);
+  }
+  function scheduleExpiry(at) {
+    clearTimeout(expiryTimer); expiresAt = at || 0;
+    if (!expiresAt) return;
+    var ms = expiresAt - Date.now();
+    if (ms <= 0) return expire();
+    // setTimeout overflows above ~24.8 days and fires immediately — clamp, just in case.
+    expiryTimer = setTimeout(expire, Math.min(ms + 250, 2147483647));
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && expiresAt && Date.now() >= expiresAt && !inside.hidden) expire();
+  });
+
+  /* ── Menu: two expandable lists ── */
+  function renderItems(s) {
+    var ul = el('ul', 'items' + (s.numbered ? '' : ' plain'));
+    s.items.forEach(function (it) {
+      var li = el('li', 'item');
+      var row = el('div', 'item-row');
+      if (s.numbered && it.num) row.appendChild(el('span', 'num', it.num));
+      var name = el('span', 'name'); name.innerHTML = it.name;            // our own data (may contain <em>)
+      row.appendChild(name);
+      row.appendChild(el('span', 'price' + (it.price ? '' : ' ph'), it.price || '—'));  // price or placeholder
+      li.appendChild(row);
+      if (it.cn || it.pinyin) {
+        var cn = el('p', 'cn');
+        if (it.cn) cn.appendChild(el('span', 'hanzi', it.cn));
+        if (it.pinyin) cn.appendChild(el('span', 'pinyin', it.pinyin));
+        li.appendChild(cn);
+      }
+      if (it.tag) li.appendChild(el('p', 'tag', it.tag));
+      if (it.desc) li.appendChild(el('p', 'desc', it.desc));
+      if (it.pour) li.appendChild(el('p', 'pour', it.pour));
+      if (it.strength) li.appendChild(el('p', 'strength', it.strength));
+      ul.appendChild(li);
+    });
+    return ul;
+  }
+
+  function renderMenu(menu) {
+    var root = $('menu'); root.textContent = '';
+    var wrap = el('div', 'menu-acc');
+    var accs = [];
+
+    (menu.sections || []).forEach(function (s) {
+      var acc = el('div', 'acc'); acc.id = 'acc-' + s.id;
+      var button = el('button', 'acc-btn'); button.type = 'button';
+      button.setAttribute('aria-expanded', 'false'); button.setAttribute('aria-controls', 'panel-' + s.id);
+      if (s.label) button.appendChild(el('span', 'acc-label', s.label));
+      var t = el('span', 'acc-title'); t.innerHTML = s.title; button.appendChild(t);
+      if (s.sub) button.appendChild(el('span', 'acc-sub', s.sub));
+      button.appendChild(el('span', 'acc-icon', '+'));
+
+      var panel = el('div', 'acc-panel'); panel.id = 'panel-' + s.id;
+      var innerWrap = el('div', 'acc-inner');
+      if (s.items && s.items.length) innerWrap.appendChild(renderItems(s));
+      else innerWrap.appendChild(el('p', 'placeholder', s.placeholder || 'Coming soon.'));
+      panel.appendChild(innerWrap);
+
+      acc.appendChild(button); acc.appendChild(panel); wrap.appendChild(acc); accs.push(acc);
+
+      button.addEventListener('click', function () {
+        var opening = !acc.classList.contains('open');
+        accs.forEach(function (a) { a.classList.remove('open'); a.querySelector('.acc-btn').setAttribute('aria-expanded', 'false'); });
+        if (opening) {
+          acc.classList.add('open'); button.setAttribute('aria-expanded', 'true');
+          setTimeout(function () { acc.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 120);
+        }
+      });
+    });
+
+    root.appendChild(wrap);
+  }
+
+  /* ── Inside ── */
   function renderInside(data) {
     var ev = data.event, g = data.guest;
     $('guest-name').textContent = (g.name || '').split(' ')[0] || 'friend';
@@ -334,40 +469,54 @@
     renderMenu(data.menu || {});
     hide(loading); hide(gate); show(inside);
     window.scrollTo({ top: 0, behavior: 'instant' });
+    scheduleExpiry(data.session && data.session.expiresAt);
   }
 
   function load() {
     return fetch('/api/content', { credentials: 'same-origin', cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json().then(renderInside) : showGate(); })
-      .catch(function () { showGate('We couldn’t reach the door just now. Please try again.'); });
+      .catch(function () { showGate(COPY.offline); });
   }
 
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    hide(err);
-    var fd = new FormData(form);
-    var payload = { name: fd.get('name') || '', phone: fd.get('phone') || '', passcode: fd.get('passcode') || '' };
-    if (!payload.phone.trim()) { err.textContent = 'Please enter your mobile number.'; show(err); return; }
-    if (payload.passcode.length < 4) { err.textContent = 'Passcode needs to be at least 4 characters.'; show(err); return; }
-    btn.disabled = true; btn.textContent = 'One moment…';
-    fetch('/api/auth', {
+  function postJSON(url, body) {
+    return fetch(url, {
       method: 'POST', credentials: 'same-origin',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(payload)
-    }).then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
-      .then(function (res) {
-        btn.disabled = false; btn.textContent = 'Enter';
-        if (!res.ok) { err.textContent = res.body.error || 'Something went wrong.'; show(err); return; }
-        form.reset();
-        return load();
-      })
-      .catch(function () {
-        btn.disabled = false; btn.textContent = 'Enter';
-        err.textContent = 'We couldn’t reach the door just now. Please try again.'; show(err);
-      });
+      body: JSON.stringify(body)
+    }).then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); });
+  }
+
+  /* ── Form ── */
+  form.addEventListener('submit', function (e) {
+    e.preventDefault(); setErr('');
+
+    if (state.step === 'phone') {
+      var phone = inPhone.value.trim();
+      if (!phone) { setErr('Please enter your mobile number.'); return; }
+      busy(true, 'One moment…');
+      postJSON('/api/lookup', { phone: phone }).then(function (res) {
+        if (!res.ok) { busy(false, 'Continue'); setErr(res.body.error || 'Something went wrong.'); return; }
+        state.phone = phone;
+        toAuthStep(!!res.body.registered, res.body.phone);
+      }).catch(function () { busy(false, 'Continue'); setErr(COPY.offline); });
+      return;
+    }
+
+    var pin = inPin.value;
+    if (pin.length < 4) { setErr('PIN needs to be at least 4 characters.'); return; }
+    if (!state.registered && inName.value.trim().length < 2) { setErr('Please enter your full name.'); return; }
+    busy(true, 'One moment…');
+    postJSON('/api/auth', { name: inName.value, phone: state.phone, passcode: pin }).then(function (res) {
+      if (!res.ok) { busy(false, 'Enter'); setErr(res.body.error || 'Something went wrong.'); return; }
+      inPin.value = ''; inName.value = '';
+      return load();
+    }).catch(function () { busy(false, 'Enter'); setErr(COPY.offline); });
   });
 
+  $('change-phone').addEventListener('click', function () { toPhoneStep(); inPhone.focus(); });
+
   $('signout').addEventListener('click', function () {
+    clearTimeout(expiryTimer); expiresAt = 0;
     fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }).finally(function () { showGate(); });
   });
 

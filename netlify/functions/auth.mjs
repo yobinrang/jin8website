@@ -36,10 +36,13 @@ export default async (req) => {
     }
     existing.lastLogin = now;
     existing.logins = (existing.logins ?? 0) + 1;
+    // Records created before the index existed (or whose index write once
+    // failed) get indexed on their next login; after that we skip the two
+    // extra database round-trips.
+    if (!existing.indexed) {
+      try { await addToIndex(phone); existing.indexed = true; } catch (e) { console.error('index touch failed', phone, e); }
+    }
     await store.setJSON(phone, existing);
-    // Idempotent: makes sure records created before the index existed (or
-    // whose index write once failed) become visible to the admin list.
-    try { await addToIndex(phone); } catch (e) { console.error('index touch failed', phone, e); }
     return json(200, { ok: true, name: existing.name, returning: true }, {
       'set-cookie': makeSessionCookie(phone),
     });
@@ -48,11 +51,12 @@ export default async (req) => {
   if (name.length < 2) return json(400, { error: 'Please enter your full name.' });
 
   const { salt, hash } = hashPasscode(passcode);
-  await store.setJSON(phone, { name, phone, salt, hash, createdAt: now, lastLogin: now, logins: 1 });
+  const record = { name, phone, salt, hash, createdAt: now, lastLogin: now, logins: 1, indexed: false };
 
-  // Keep the admin list instant. If this fails the record still exists and
-  // the admin list()-fallback will pick it up; never fail the registration.
-  try { await addToIndex(phone); } catch (e) { console.error('index add failed', phone, e); }
+  // Keep the admin list instant. If the index write fails the record still
+  // exists (indexed:false, retried on next login); never fail the registration.
+  try { await addToIndex(phone); record.indexed = true; } catch (e) { console.error('index add failed', phone, e); }
+  await store.setJSON(phone, record);
 
   return json(201, { ok: true, name, returning: false }, {
     'set-cookie': makeSessionCookie(phone),

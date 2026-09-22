@@ -4,7 +4,7 @@ import { hashPasscode, verifyPasscode } from '../lib/crypto.mjs';
 import { makeSessionCookie } from '../lib/session.mjs';
 import { registrations } from '../lib/store.mjs';
 import { addToIndex } from '../lib/index.mjs';
-import { getEvent } from '../lib/events.mjs';
+import { getEvent, fullMessage } from '../lib/events.mjs';
 
 // POST /api/auth?event=thu|sat  { name, phone, passcode }
 //
@@ -56,9 +56,17 @@ export default async (req) => {
   const { salt, hash } = hashPasscode(passcode);
   const record = { name, phone, salt, hash, createdAt: now, lastLogin: now, logins: 1, indexed: false };
 
-  // Keep the admin list instant. If the index write fails the record still
-  // exists (indexed:false, retried on next login); never fail the registration.
-  try { await addToIndex(ev, phone); record.indexed = true; } catch (e) { console.error('index add failed', ev.id, phone, e); }
+  // Claim a place on the list first; this is where the capacity is enforced.
+  // A full list refuses the new number. Any other index glitch is logged and
+  // the guest is let in (indexed:false, retried on next login) rather than
+  // turned away.
+  try {
+    await addToIndex(ev, phone, ev.capacity);
+    record.indexed = true;
+  } catch (e) {
+    if (e.code === 'FULL') return json(409, { error: fullMessage(ev), full: true });
+    console.error('index add failed', ev.id, phone, e);
+  }
   await store.setJSON(phone, record);
 
   return json(201, { ok: true, name, returning: false }, {

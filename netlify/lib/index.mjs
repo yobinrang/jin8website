@@ -51,8 +51,20 @@ async function updateIndex(ev, mutate) {
   return next;
 }
 
-export function addToIndex(ev, phone) {
-  return updateIndex(ev, (p) => (p.includes(phone) ? p : [...p, phone]));
+export class ListFullError extends Error {
+  constructor() { super('list full'); this.code = 'FULL'; }
+}
+
+// Adds a phone to the night's index. With `cap`, refuses (ListFullError)
+// when the list already holds that many numbers. The check runs inside the
+// compare-and-set loop, so two simultaneous sign-ups for the last spot
+// can't both succeed.
+export function addToIndex(ev, phone, cap = 0) {
+  return updateIndex(ev, (p) => {
+    if (p.includes(phone)) return p;
+    if (cap && p.length >= cap) throw new ListFullError();
+    return [...p, phone];
+  });
 }
 
 export function removeFromIndex(ev, phone) {

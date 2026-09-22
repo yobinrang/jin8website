@@ -637,6 +637,7 @@
       busy(true, 'One moment…');
       postJSON('/api/lookup', { phone: phone }).then(function (res) {
         if (!res.ok) { busy(false, 'Continue'); setErr(res.body.error || 'Something went wrong.'); return; }
+        if (!res.body.registered && res.body.full) { busy(false, 'Continue'); setErr(res.body.message || 'Sorry, this night is full.'); return; }
         state.phone = phone;
         toAuthStep(!!res.body.registered, res.body.phone);
       }).catch(function () { busy(false, 'Continue'); setErr(COPY.offline); });

@@ -117,7 +117,7 @@ export default async (req, context) => {
   rows.sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1));
 
   return json(200, {
-    event: { id: ev.id, name: ev.name, date: ev.date },
+    event: { id: ev.id, name: ev.name, date: ev.date, capacity: ev.capacity || null },
     count: rows.length,
     feedbackCount: rows.filter((r) => r.feedback).length,
     registrations: rows.map(({ name, phone, createdAt, lastLogin, logins, feedback }) => ({

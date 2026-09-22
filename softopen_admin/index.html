@@ -41,6 +41,7 @@
   .meta { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin: 8px 0 18px; }
   .count { font-family: 'Cormorant Garamond', serif; font-size: 22px; }
   .count em { color: var(--gold); font-style: italic; }
+  .count .full { color: var(--gold); font-style: italic; }
   .stamp { font-family: 'Cormorant SC', serif; font-size: 9.5px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); opacity: 0.55; }
   .note { font-size: 13px; font-style: italic; opacity: 0.45; margin-top: 22px; line-height: 1.5; }
   table { width: 100%; border-collapse: collapse; }
@@ -85,7 +86,7 @@
     </div>
 
     <div class="meta">
-      <p class="count"><em id="count">0</em> registered for <span id="night-name"></span></p>
+      <p class="count"><em id="count">0</em><span id="cap"></span> registered for <span id="night-name"></span><span class="full" id="full" hidden> · Full</span></p>
       <p class="stamp" id="stamp"></p>
     </div>
     <table>
@@ -113,6 +114,7 @@
 
   var active = 'thu';
   var data = { thu: [], sat: [] }, seen = { thu: {}, sat: {} }, loaded = { thu: false, sat: false }, added = { thu: 0, sat: 0 };
+  var cap = { thu: null, sat: null };
   var timer = null;
 
   try {
@@ -137,6 +139,7 @@
     var fresh = body.registrations || [];
     added[ev] = loaded[ev] ? fresh.filter(function (r) { return !seen[ev][r.phone]; }).length : 0;
     data[ev] = fresh; loaded[ev] = true;
+    cap[ev] = (body.event && body.event.capacity) || null;
     fresh.forEach(function (r) { seen[ev][r.phone] = true; });
   }
 
@@ -166,7 +169,7 @@
   document.addEventListener('visibilitychange', function () { if (!document.hidden && !out.hidden) load(true); });
 
   function render() {
-    ORDER.forEach(function (ev) { $('tc-' + ev).textContent = data[ev].length; });
+    ORDER.forEach(function (ev) { $('tc-' + ev).textContent = data[ev].length + (cap[ev] ? '/' + cap[ev] : ''); });
     Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
       var on = t.getAttribute('data-ev') === active;
       t.classList.toggle('on', on); t.setAttribute('aria-selected', on ? 'true' : 'false');
@@ -174,6 +177,8 @@
 
     var list = data[active];
     $('count').textContent = list.length;
+    $('cap').textContent = cap[active] ? ' of ' + cap[active] : '';
+    $('full').hidden = !(cap[active] && list.length >= cap[active]);
     $('night-name').textContent = NIGHTS[active];
     $('stamp').textContent = 'Updated ' + now();
     $('empty').hidden = list.length > 0;

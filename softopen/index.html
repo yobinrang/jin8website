@@ -167,6 +167,16 @@
   .acc-inner .item:last-child { border-bottom: none; }
   .acc-inner .placeholder { border-top: 1px solid var(--rule); padding: 22px 0 26px; }
   .placeholder { text-align: center; font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 16px; line-height: 1.55; opacity: 0.55; }
+  .menu-note {
+    display: block; width: max-content; max-width: 100%; margin: 16px auto 0; padding: 9px 16px;
+    font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--gold); border: 1px solid rgba(201,169,97,0.4); border-radius: 2px; text-align: center; line-height: 1.5;
+  }
+  .group-title {
+    font-family: 'Cormorant SC', serif; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase;
+    color: var(--gold); opacity: 0.8; padding: 22px 0 4px; border-top: 1px solid var(--rule);
+  }
+  .acc-inner .group-title + .items { border-top: none; }
 
   /* Items (used once the menu is revealed) */
   .items { list-style: none; }
@@ -240,7 +250,19 @@
     <img class="logo" src="../assets/jin8-logo-royal.png" alt="Jin 8">
     <div class="kicker" id="kicker">You’re invited</div>
     <h1>Soft <em>Opening</em></h1>
-    <p class="when">Thursday 24 September · from 7pm</p>
+    <p class="when" id="when"></p>
+    <script>
+      // One page, two nights: /softopen is Thursday, /softopen_sat is Saturday.
+      (function () {
+        var nights = {
+          thu: 'Thursday 24 September · from 7pm',
+          sat: 'Saturday 26 September · from 7pm'
+        };
+        var ev = /^\/softopen_sat(\/|$)/.test(location.pathname) ? 'sat' : 'thu';
+        window.JIN8_EVENT = ev;
+        document.getElementById('when').textContent = nights[ev];
+      })();
+    </script>
   </header>
 
   <div class="loading" id="loading">Opening the door…</div>
@@ -300,7 +322,7 @@
       <div class="section-head">
         <div class="section-label">Soft Opening</div>
         <h2>The <em>Menu</em></h2>
-        <p class="sub" id="menu-sub"></p>
+        <p class="menu-note" id="menu-note" hidden></p>
       </div>
       <div id="menu"></div>
     </section>
@@ -336,6 +358,8 @@
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
+  var EV = window.JIN8_EVENT || 'thu';
+  function api(p) { return p + (p.indexOf('?') < 0 ? '?' : '&') + 'event=' + encodeURIComponent(EV); }
   var loading = $('loading'), gate = $('gate'), inside = $('inside');
   var form = $('gate-form'), err = $('gate-err'), btn = $('gate-btn');
   var stepPhone = $('step-phone'), stepAuth = $('step-auth'), nameField = $('name-field');
@@ -370,7 +394,7 @@
   }
 
   function postJSON(url, body) {
-    return fetch(url, {
+    return fetch(api(url), {
       method: 'POST', credentials: 'same-origin',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body)
@@ -412,7 +436,7 @@
 
   /* ── Auto sign-out (5 minutes from login, set by the server) ── */
   function expire() {
-    fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }).catch(function () {});
+    fetch(api('/api/logout'), { method: 'POST', credentials: 'same-origin' }).catch(function () {});
     showGate(COPY.expired);
   }
   function scheduleExpiry(at) {
@@ -460,7 +484,7 @@
       if (s.numbered && it.num) row.appendChild(el('span', 'num', it.num));
       var name = el('span', 'name'); name.innerHTML = it.name;
       row.appendChild(name);
-      row.appendChild(el('span', 'price' + (it.price ? '' : ' ph'), it.price || '—'));
+      if (!it.noPrice) row.appendChild(el('span', 'price' + (it.price ? '' : ' ph'), it.price || '—'));
       li.appendChild(row);
       if (it.cn || it.pinyin) {
         var cn = el('p', 'cn');
@@ -478,12 +502,25 @@
   }
 
   function renderMenu(menu) {
-    $('menu-sub').textContent = menu.sub || '';
+    var note = $('menu-note');
+    if (menu.note) { note.textContent = menu.note; show(note); } else { hide(note); }
     var root = $('menu'); root.textContent = '';
     accGroups.menu = [];
     var wrap = el('div', 'acc-list');
     (menu.sections || []).forEach(function (s) {
-      var body = (s.items && s.items.length) ? renderItems(s) : el('p', 'placeholder', s.placeholder || 'Coming soon.');
+      var groups = (s.groups || []).filter(function (g) { return g.items && g.items.length; });
+      var body;
+      if (groups.length) {
+        body = el('div');
+        groups.forEach(function (g) {
+          body.appendChild(el('p', 'group-title', g.title));
+          body.appendChild(renderItems({ numbered: false, items: g.items }));
+        });
+      } else if (s.items && s.items.length) {
+        body = renderItems(s);
+      } else {
+        body = el('p', 'placeholder', s.placeholder || 'Coming soon.');
+      }
       wrap.appendChild(makeAcc('menu', s.id, s.label, s.title, s.sub, body));
     });
     root.appendChild(wrap);
@@ -585,7 +622,7 @@
   }
 
   function load() {
-    return fetch('/api/content', { credentials: 'same-origin', cache: 'no-store' })
+    return fetch(api('/api/content'), { credentials: 'same-origin', cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json().then(renderInside) : showGate(); })
       .catch(function () { showGate(COPY.offline); });
   }
@@ -621,7 +658,7 @@
 
   $('signout').addEventListener('click', function () {
     clearTimeout(expiryTimer); expiresAt = 0;
-    fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }).finally(function () { showGate(); });
+    fetch(api('/api/logout'), { method: 'POST', credentials: 'same-origin' }).finally(function () { showGate(); });
   });
 
   load();

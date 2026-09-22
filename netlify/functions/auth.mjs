@@ -4,16 +4,19 @@ import { hashPasscode, verifyPasscode } from '../lib/crypto.mjs';
 import { makeSessionCookie } from '../lib/session.mjs';
 import { registrations } from '../lib/store.mjs';
 import { addToIndex } from '../lib/index.mjs';
+import { getEvent } from '../lib/events.mjs';
 
-// POST /api/auth  { name, phone, passcode }
+// POST /api/auth?event=thu|sat  { name, phone, passcode }
 //
-// Register-or-login in one step:
-//   • phone not seen before  → create the record (name required), sign in  → 201
-//   • phone already exists   → PIN must match the stored hash, sign in     → 200
-//   • phone exists, mismatch → 401 (no duplicate is ever created)
+// Register-or-login for one night's list:
+//   • phone not on this night's list → create the record (name required) → 201
+//   • phone already on it           → PIN must match the stored hash    → 200
+//   • phone on it, PIN mismatch     → 401 (no duplicate is ever created)
 
 export default async (req) => {
   if (req.method !== 'POST') return json(405, { error: 'Method not allowed' });
+  const ev = getEvent(req);
+  if (!ev) return json(400, { error: 'Unknown event.' });
 
   let body;
   try { body = await req.json(); } catch { return json(400, { error: 'Invalid request.' }); }
@@ -26,7 +29,7 @@ export default async (req) => {
   if (passcode.length < 4) return json(400, { error: 'PIN needs to be at least 4 characters.' });
   if (passcode.length > 64) return json(400, { error: 'PIN is too long.' });
 
-  const store = registrations();
+  const store = registrations(ev);
   const existing = await store.get(phone, { type: 'json' });
   const now = new Date().toISOString();
 
@@ -37,14 +40,14 @@ export default async (req) => {
     existing.lastLogin = now;
     existing.logins = (existing.logins ?? 0) + 1;
     // Records created before the index existed (or whose index write once
-    // failed) get indexed on their next login; after that we skip the two
-    // extra database round-trips.
+    // failed) get indexed on their next login; after that we skip the extra
+    // database round-trips.
     if (!existing.indexed) {
-      try { await addToIndex(phone); existing.indexed = true; } catch (e) { console.error('index touch failed', phone, e); }
+      try { await addToIndex(ev, phone); existing.indexed = true; } catch (e) { console.error('index touch failed', ev.id, phone, e); }
     }
     await store.setJSON(phone, existing);
     return json(200, { ok: true, name: existing.name, returning: true }, {
-      'set-cookie': makeSessionCookie(phone),
+      'set-cookie': makeSessionCookie(phone, ev.id),
     });
   }
 
@@ -55,11 +58,11 @@ export default async (req) => {
 
   // Keep the admin list instant. If the index write fails the record still
   // exists (indexed:false, retried on next login); never fail the registration.
-  try { await addToIndex(phone); record.indexed = true; } catch (e) { console.error('index add failed', phone, e); }
+  try { await addToIndex(ev, phone); record.indexed = true; } catch (e) { console.error('index add failed', ev.id, phone, e); }
   await store.setJSON(phone, record);
 
   return json(201, { ok: true, name, returning: false }, {
-    'set-cookie': makeSessionCookie(phone),
+    'set-cookie': makeSessionCookie(phone, ev.id),
   });
 };
 

@@ -27,6 +27,17 @@
   button.danger:hover { background: #8B0000; border-color: #8B0000; color: var(--cream); }
   .msg { font-style: italic; opacity: 0.7; margin: 8px 0; min-height: 1.4em; }
   .msg.err { color: #E8B4A0; }
+
+  .tabs { display: flex; gap: 0; margin: 18px 0 22px; border-bottom: 1px solid var(--rule); }
+  .tab { border: none; border-bottom: 2px solid transparent; padding: 12px 18px 11px; margin-bottom: -1px; opacity: 0.55; font-size: 11px; }
+  .tab:hover { background: none; color: var(--gold); opacity: 1; }
+  .tab.on { color: var(--gold); border-bottom-color: var(--gold); opacity: 1; }
+  .tab .tc {
+    display: inline-block; min-width: 22px; margin-left: 8px; padding: 1px 6px; border: 1px solid rgba(201,169,97,0.35); border-radius: 10px;
+    font-family: 'Cormorant Garamond', serif; font-size: 14px; letter-spacing: 0; line-height: 1.3; text-align: center;
+  }
+  .tab.on .tc { border-color: var(--gold); }
+
   .meta { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin: 8px 0 18px; }
   .count { font-family: 'Cormorant Garamond', serif; font-size: 22px; }
   .count em { color: var(--gold); font-style: italic; }
@@ -50,13 +61,13 @@
   .fb-scores b { font-family: 'Cormorant Garamond', serif; font-size: 16px; letter-spacing: 0; color: var(--cream); }
   .fb-note { font-size: 15px; line-height: 1.55; opacity: 0.8; margin-top: 6px; }
   .fb-note span { font-family: 'Cormorant SC', serif; font-size: 9.5px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); opacity: 0.7; margin-right: 8px; }
-  @media (max-width: 640px) { td.t.last, th.last { display: none; } }
+  @media (max-width: 640px) { td.t.last, th.last { display: none; } .tab { padding: 12px 12px 11px; } }
 </style>
 </head>
 <body>
 <div class="page">
   <h1>Soft Opening <em>Guest List</em></h1>
-  <p class="sub">Jin 8 · Thursday 24 September</p>
+  <p class="sub">Jin 8 · Box Hill</p>
 
   <div class="bar">
     <input id="key" type="password" inputmode="numeric" placeholder="Admin PIN" autocomplete="off">
@@ -68,8 +79,13 @@
   <p class="msg" id="msg"></p>
 
   <div id="out" hidden>
+    <div class="tabs" role="tablist">
+      <button class="tab on" role="tab" data-ev="thu" aria-selected="true">Thursday<span class="tc" id="tc-thu">0</span></button>
+      <button class="tab" role="tab" data-ev="sat" aria-selected="false">Saturday<span class="tc" id="tc-sat">0</span></button>
+    </div>
+
     <div class="meta">
-      <p class="count"><em id="count">0</em> registered</p>
+      <p class="count"><em id="count">0</em> registered for <span id="night-name"></span></p>
       <p class="stamp" id="stamp"></p>
     </div>
     <table>
@@ -78,11 +94,11 @@
     </table>
     <p class="empty" id="empty" hidden>Nobody yet.</p>
 
-    <h2 id="fb-heading"><em id="fb-count">0</em> feedback</h2>
+    <h2><em id="fb-count">0</em> feedback</h2>
     <div id="fb-list"></div>
     <p class="empty" id="fb-empty">No feedback yet.</p>
 
-    <p class="note">Refreshes itself every 20 seconds while open. Registrations appear here the moment they happen.</p>
+    <p class="note">Each night has its own list. Both refresh every 20 seconds while this page is open, and new registrations appear the moment they happen.</p>
   </div>
 </div>
 
@@ -90,11 +106,19 @@
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var keyInput = $('key'), msg = $('msg'), out = $('out'), rows = $('rows');
-  var data = [], seen = {}, timer = null;
-  var REFRESH_MS = 20000;
+  var NIGHTS = { thu: 'Thursday 24 September', sat: 'Saturday 26 September' };
+  var ORDER = ['thu', 'sat'];
   var AREAS = [['drinks', 'Drinks'], ['service', 'Service'], ['venue', 'Venue & ops']];
+  var REFRESH_MS = 20000;
 
-  try { var saved = sessionStorage.getItem('jin8_admin_key'); if (saved) keyInput.value = saved; } catch (e) {}
+  var active = 'thu';
+  var data = { thu: [], sat: [] }, seen = { thu: {}, sat: {} }, loaded = { thu: false, sat: false }, added = { thu: 0, sat: 0 };
+  var timer = null;
+
+  try {
+    var saved = sessionStorage.getItem('jin8_admin_key'); if (saved) keyInput.value = saved;
+    var tab = sessionStorage.getItem('jin8_admin_tab'); if (NIGHTS[tab]) active = tab;
+  } catch (e) {}
 
   function note(text, isErr) { msg.textContent = text || ''; msg.classList.toggle('err', !!isErr); }
   function fmt(iso) {
@@ -104,38 +128,59 @@
   function now() { return new Date().toLocaleTimeString('en-AU', { timeZone: 'Australia/Melbourne', hour: 'numeric', minute: '2-digit', second: '2-digit' }); }
   function key() { return keyInput.value.trim(); }
 
+  function fetchNight(k, ev) {
+    return fetch('/api/admin?event=' + ev, { headers: { 'x-admin-key': k }, cache: 'no-store' })
+      .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); });
+  }
+
+  function take(ev, body) {
+    var fresh = body.registrations || [];
+    added[ev] = loaded[ev] ? fresh.filter(function (r) { return !seen[ev][r.phone]; }).length : 0;
+    data[ev] = fresh; loaded[ev] = true;
+    fresh.forEach(function (r) { seen[ev][r.phone] = true; });
+  }
+
+  // Sequential on purpose: a wrong PIN should only count as one attempt.
   function load(quiet) {
     var k = key();
     if (!k) { note('Enter the admin PIN.', true); return; }
     if (!quiet) note('Opening…');
-    return fetch('/api/admin', { headers: { 'x-admin-key': k }, cache: 'no-store' })
-      .then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
-      .then(function (res) {
-        if (!res.ok) { note(res.body.error || 'Unauthorised.', true); out.hidden = true; stop(); return; }
+    return fetchNight(k, 'thu').then(function (a) {
+      if (!a.ok) { fail(a.body); return; }
+      return fetchNight(k, 'sat').then(function (b) {
+        if (!b.ok) { fail(b.body); return; }
         try { sessionStorage.setItem('jin8_admin_key', k); } catch (e) {}
-        var fresh = res.body.registrations || [];
-        var added = fresh.filter(function (r) { return data.length && !seen[r.phone]; }).length;
-        data = fresh; fresh.forEach(function (r) { seen[r.phone] = true; });
-        render(added);
-        note(added ? added + ' new since last refresh.' : '');
+        take('thu', a.body); take('sat', b.body);
+        render();
+        var news = ORDER.filter(function (ev) { return added[ev]; }).map(function (ev) { return added[ev] + ' new for ' + NIGHTS[ev].split(' ')[0]; });
+        note(news.length ? news.join(' · ') + '.' : '');
         $('refresh').hidden = false; $('csv').hidden = false; $('forget').hidden = false; out.hidden = false;
         start();
-      })
-      .catch(function () { note('Could not reach the server.', true); });
+      });
+    }).catch(function () { note('Could not reach the server.', true); });
   }
+  function fail(body) { note((body && body.error) || 'Unauthorised.', true); out.hidden = true; stop(); }
 
   function start() { stop(); timer = setInterval(function () { if (!document.hidden) load(true); }, REFRESH_MS); }
   function stop() { if (timer) { clearInterval(timer); timer = null; } }
   document.addEventListener('visibilitychange', function () { if (!document.hidden && !out.hidden) load(true); });
 
-  function render(added) {
-    $('count').textContent = data.length;
+  function render() {
+    ORDER.forEach(function (ev) { $('tc-' + ev).textContent = data[ev].length; });
+    Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
+      var on = t.getAttribute('data-ev') === active;
+      t.classList.toggle('on', on); t.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+
+    var list = data[active];
+    $('count').textContent = list.length;
+    $('night-name').textContent = NIGHTS[active];
     $('stamp').textContent = 'Updated ' + now();
-    $('empty').hidden = data.length > 0;
+    $('empty').hidden = list.length > 0;
     rows.textContent = '';
-    data.forEach(function (r, i) {
+    list.forEach(function (r, i) {
       var tr = document.createElement('tr');
-      if (added && i >= data.length - added) tr.className = 'new';
+      if (added[active] && i >= list.length - added[active]) tr.className = 'new';
       function td(cls, text) { var c = document.createElement('td'); if (cls) c.className = cls; c.textContent = text; tr.appendChild(c); return c; }
       td('n', r.name);
       td('p', r.phonePretty || r.phone);
@@ -143,21 +188,21 @@
       td('t last', fmt(r.lastLogin) + (r.logins > 1 ? ' · ' + r.logins + '×' : ''));
       var a = td('a', '');
       var del = document.createElement('button'); del.className = 'quiet danger'; del.textContent = 'Remove';
+      var ev = active;
       del.addEventListener('click', function () {
-        if (!confirm('Remove ' + r.name + ' (' + (r.phonePretty || r.phone) + ')? They can register again.')) return;
-        fetch('/api/admin?phone=' + encodeURIComponent(r.phone), { method: 'DELETE', headers: { 'x-admin-key': key() } })
-          .then(function (res) { if (res.ok) { delete seen[r.phone]; load(); } else note('Could not remove.', true); });
+        if (!confirm('Remove ' + r.name + ' (' + (r.phonePretty || r.phone) + ') from ' + NIGHTS[ev] + '? They can register again.')) return;
+        fetch('/api/admin?event=' + ev + '&phone=' + encodeURIComponent(r.phone), { method: 'DELETE', headers: { 'x-admin-key': key() } })
+          .then(function (res) { if (res.ok) { delete seen[ev][r.phone]; load(); } else note('Could not remove.', true); });
       });
       a.appendChild(del);
       rows.appendChild(tr);
     });
 
-    // Feedback
-    var withFb = data.filter(function (r) { return r.feedback; });
+    var withFb = list.filter(function (r) { return r.feedback; });
     $('fb-count').textContent = withFb.length;
     $('fb-empty').hidden = withFb.length > 0;
-    var list = $('fb-list'); list.textContent = '';
-    withFb.sort(function (a, b) { return a.feedback.submittedAt < b.feedback.submittedAt ? 1 : -1; }).forEach(function (r) {
+    var fbList = $('fb-list'); fbList.textContent = '';
+    withFb.slice().sort(function (a, b) { return a.feedback.submittedAt < b.feedback.submittedAt ? 1 : -1; }).forEach(function (r) {
       var f = r.feedback;
       var box = document.createElement('div'); box.className = 'fb';
       var head = document.createElement('div'); head.className = 'fb-head';
@@ -165,16 +210,18 @@
       var wh = document.createElement('span'); wh.className = 'fb-when'; wh.textContent = fmt(f.submittedAt);
       head.appendChild(nm); head.appendChild(wh); box.appendChild(head);
       var sc = document.createElement('div'); sc.className = 'fb-scores';
-      AREAS.forEach(function (a) {
-        var v = f[a[0]] && f[a[0]].rating;
-        var s = document.createElement('span'); s.innerHTML = a[1] + ' <b>' + (v ? v + '/5' : '—') + '</b>'; sc.appendChild(s);
+      AREAS.forEach(function (ar) {
+        var v = f[ar[0]] && f[ar[0]].rating;
+        var s = document.createElement('span'); s.textContent = ar[1] + ' ';
+        var b = document.createElement('b'); b.textContent = v ? v + '/5' : '—'; s.appendChild(b);
+        sc.appendChild(s);
       });
       box.appendChild(sc);
-      AREAS.forEach(function (a) {
-        var n = f[a[0]] && f[a[0]].note;
+      AREAS.forEach(function (ar) {
+        var n = f[ar[0]] && f[ar[0]].note;
         if (!n) return;
         var p = document.createElement('p'); p.className = 'fb-note';
-        var lab = document.createElement('span'); lab.textContent = a[1]; p.appendChild(lab); p.appendChild(document.createTextNode(n));
+        var lab = document.createElement('span'); lab.textContent = ar[1]; p.appendChild(lab); p.appendChild(document.createTextNode(n));
         box.appendChild(p);
       });
       if (f.other) {
@@ -182,9 +229,17 @@
         var lab2 = document.createElement('span'); lab2.textContent = 'Other'; p2.appendChild(lab2); p2.appendChild(document.createTextNode(f.other));
         box.appendChild(p2);
       }
-      list.appendChild(box);
+      fbList.appendChild(box);
     });
   }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'), function (t) {
+    t.addEventListener('click', function () {
+      active = t.getAttribute('data-ev'); added[active] = 0;
+      try { sessionStorage.setItem('jin8_admin_tab', active); } catch (e) {}
+      render();
+    });
+  });
 
   $('load').addEventListener('click', function () { load(); });
   $('refresh').addEventListener('click', function () { load(); });
@@ -194,13 +249,14 @@
     keyInput.value = ''; out.hidden = true; $('refresh').hidden = true; $('csv').hidden = true; $('forget').hidden = true; stop(); note('Locked.');
   });
   $('csv').addEventListener('click', function () {
-    var head = ['Name', 'Mobile', 'Registered', 'Last seen', 'Logins', 'Drinks rating', 'Drinks note', 'Service rating', 'Service note', 'Venue rating', 'Venue note', 'Other feedback', 'Feedback sent'];
-    var lines = [head].concat(data.map(function (r) {
+    var head = ['Night', 'Name', 'Mobile', 'Registered', 'Last seen', 'Logins', 'Drinks rating', 'Drinks note', 'Service rating', 'Service note', 'Venue rating', 'Venue note', 'Other feedback', 'Feedback sent'];
+    var night = NIGHTS[active];
+    var lines = [head].concat(data[active].map(function (r) {
       var f = r.feedback || {};
       var g = function (a, k) { return f[a] ? (f[a][k] == null ? '' : f[a][k]) : ''; };
-      return [r.name, r.phone, r.createdAt, r.lastLogin, r.logins, g('drinks', 'rating'), g('drinks', 'note'), g('service', 'rating'), g('service', 'note'), g('venue', 'rating'), g('venue', 'note'), f.other || '', f.submittedAt || ''];
+      return [night, r.name, r.phone, r.createdAt, r.lastLogin, r.logins, g('drinks', 'rating'), g('drinks', 'note'), g('service', 'rating'), g('service', 'note'), g('venue', 'rating'), g('venue', 'note'), f.other || '', f.submittedAt || ''];
     })).map(function (row) { return row.map(function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }).join(','); }).join('\n');
-    navigator.clipboard.writeText(lines).then(function () { note('Copied ' + data.length + ' rows as CSV.'); }, function () { note('Copy failed — select the table and copy manually.', true); });
+    navigator.clipboard.writeText(lines).then(function () { note('Copied ' + data[active].length + ' ' + night.split(' ')[0] + ' rows as CSV.'); }, function () { note('Copy failed. Select the table and copy manually.', true); });
   });
 
   if (keyInput.value) load();

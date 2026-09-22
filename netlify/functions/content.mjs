@@ -2,30 +2,32 @@ import { json } from '../lib/http.mjs';
 import { readSession } from '../lib/session.mjs';
 import { registrations } from '../lib/store.mjs';
 import { formatPhone } from '../lib/phone.mjs';
-import { MENU_REVEALED, FEEDBACK_OPEN, FEEDBACK_OPENS_ON } from '../lib/config.mjs';
+import { getEvent } from '../lib/events.mjs';
 
-// GET /api/content — the gated invitation content.
-// Only returned when the request carries a valid session cookie AND the
-// phone in that session still exists in the registrations store.
+// GET /api/content?event=thu|sat — the gated invitation content.
+// Only returned when the request carries a valid session cookie for that
+// night AND the phone in it is on that night's list.
 
-// ── Event copy (edit freely) ─────────────────────────────────────────────
-const EVENT = {
-  kicker: 'You’re invited',
-  title: 'Soft Opening',
-  date: 'Thursday 24 September 2026',
-  time: 'From 7pm',
-  address: '18B Rutland Road, Box Hill VIC 3128',
-  mapsUrl: 'https://maps.google.com/?q=18B+Rutland+Road+Box+Hill+VIC+3128',
-  intro: 'Thank you for being here from day one.',
-  notes: [
-    'Doors open at 7. Come whenever suits you.',
-    'You’ll get a first look at our signatures, plus a short list of classics.',
-    'We’re still testing how the bar runs, so bear with us while we get it right.',
-    'The soft opening is invite only, and the list is closed.',
-  ],
-  contact: 'hello@jin8bar.com',
-  instagram: 'https://www.instagram.com/jin8_bar/',
-};
+// ── Event copy (edit freely; dates and switches live in events.mjs) ──────
+function eventCopy(ev) {
+  return {
+    kicker: 'You’re invited',
+    title: 'Soft Opening',
+    date: ev.date,
+    time: ev.time,
+    address: '18B Rutland Road, Box Hill VIC 3128',
+    mapsUrl: 'https://maps.google.com/?q=18B+Rutland+Road+Box+Hill+VIC+3128',
+    intro: 'Thank you for being here from day one.',
+    notes: [
+      `Doors open at ${ev.doors}. Come whenever suits you.`,
+      'You’ll get a first look at our signatures, plus a short list of classics.',
+      'We’re still testing how the bar runs, so bear with us while we get it right.',
+      'The soft opening is invite only, and the list is closed.',
+    ],
+    contact: 'hello@jin8bar.com',
+    instagram: 'https://www.instagram.com/jin8_bar/',
+  };
+}
 
 // ── About the bar ────────────────────────────────────────────────────────
 const ABOUT = {
@@ -34,12 +36,13 @@ const ABOUT = {
   body: 'Jin 8 began in the inner cities of China. Here, in this bar, the journey puts down roots and grows. One day, we hope, it reaches the world stage. None of that happens without you in the room.',
 };
 
-// ── Menu ─────────────────────────────────────────────────────────────────
-// The drink data stays here so MENU_REVEALED can be flipped on the day.
-// Item fields: num, name, cn (汉字), pinyin, tag, desc, and optionally
-//              price, pour, strength.
+// ── Menu (same both nights) ──────────────────────────────────────────────
+// Shown on the page above the lists, even while the lists are hidden.
+// The drink data stays here so menuRevealed can be flipped on the day.
+// A section has either `items` or `groups: [{ title, items }]`.
+// Item fields: num, name, cn (汉字), pinyin, tag, desc, price, noPrice.
 const MENU = {
-  sub: 'Tap a list to open it.',
+  note: '25% off all drinks for the soft opening',
   sections: [
     {
       id: 'the8',
@@ -74,49 +77,73 @@ const MENU = {
       sub: 'Tastes familiar to you.',
       numbered: false,
       placeholder: 'To be announced on the day of the soft opening.',
-      items: [
-        // { name: 'Negroni', pour: 'Gin, Campari, sweet vermouth' },
+      groups: [
+        { title: 'Cocktails', items: [
+          { name: 'Sour', desc: 'With the spirit of your choice.' },
+          { name: 'Negroni' },
+          { name: 'Margarita' },
+          { name: 'Espresso Martini' },
+        ] },
+        { title: 'Spirits', items: [
+          { name: 'From the back bar', desc: 'Ask the team what we’re pouring.', noPrice: true },
+        ] },
+        { title: 'Wine', items: [
+          { name: 'Last Warrior' },
+        ] },
+        { title: 'Beer', items: [
+          { name: 'Old Snow' },
+        ] },
+        { title: 'Mocktail', items: [
+          { name: 'Bartender’s choice', desc: 'Made to your taste.' },
+        ] },
       ],
     },
   ],
 };
 
 // ── Feedback panel copy ──────────────────────────────────────────────────
-const FEEDBACK = {
-  label: 'After the night',
-  title: 'Tell us how it <em>was</em>',
-  button: 'Leave feedback',
-  closedText: `Feedback opens on ${FEEDBACK_OPENS_ON}, the day after. We’ll ask about the drinks, the service, the venue and anything else on your mind.`,
-  areas: [
-    { id: 'drinks', title: 'The drinks', sub: 'Our signatures, overall', prompt: 'What stood out? What would you change?' },
-    { id: 'service', title: 'Service', sub: 'How we looked after you', prompt: 'Anything we should keep doing, or stop?' },
-    { id: 'venue', title: 'Venue & operations', sub: 'The room, the pace, the flow', prompt: 'What worked, what didn’t?' },
-  ],
-  otherPrompt: 'Anything else?',
-  thanks: 'Thank you. That helps more than you know.',
-};
+function feedbackCopy(ev) {
+  return {
+    label: 'After the night',
+    title: 'Tell us how it <em>was</em>',
+    button: 'Leave feedback',
+    closedText: `Feedback opens on ${ev.feedbackOpensOn}, the day after. We’ll ask about the drinks, the service, the venue and anything else on your mind.`,
+    areas: [
+      { id: 'drinks', title: 'The drinks', sub: 'Our signatures, overall', prompt: 'What stood out? What would you change?' },
+      { id: 'service', title: 'Service', sub: 'How we looked after you', prompt: 'Anything we should keep doing, or stop?' },
+      { id: 'venue', title: 'Venue & operations', sub: 'The room, the pace, the flow', prompt: 'What worked, what didn’t?' },
+    ],
+    otherPrompt: 'Anything else?',
+    thanks: 'Thank you. That helps more than you know.',
+    open: ev.feedbackOpen,
+    opensOn: ev.feedbackOpensOn,
+  };
+}
 
 export default async (req) => {
   if (req.method !== 'GET') return json(405, { error: 'Method not allowed' });
+  const ev = getEvent(req);
+  if (!ev) return json(400, { error: 'Unknown event.' });
 
-  const session = readSession(req);
+  const session = readSession(req, ev.id);
   if (!session) return json(401, { error: 'Not signed in.' });
 
-  const rec = await registrations().get(session.p, { type: 'json' });
+  const rec = await registrations(ev).get(session.p, { type: 'json' });
   if (!rec) return json(401, { error: 'Registration not found.' });
 
   const menu = {
     ...MENU,
-    sections: MENU.sections.map((s) => (MENU_REVEALED ? s : { ...s, items: [] })),
+    sections: MENU.sections.map((s) => (ev.menuRevealed ? s : { ...s, items: [], groups: [] })),
   };
 
   return json(200, {
+    night: { id: ev.id, name: ev.name },
     guest: { name: rec.name, phone: formatPhone(rec.phone), feedback: rec.feedback ?? null },
     session: { expiresAt: session.e * 1000 },   // ms epoch; the page signs itself out at this moment
-    event: EVENT,
+    event: eventCopy(ev),
     about: ABOUT,
     menu,
-    feedback: { ...FEEDBACK, open: FEEDBACK_OPEN, opensOn: FEEDBACK_OPENS_ON },
+    feedback: feedbackCopy(ev),
   });
 };
 

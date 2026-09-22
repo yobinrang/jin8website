@@ -1,7 +1,8 @@
 import { getStore } from '@netlify/blobs';
 
-// One Netlify Blobs store, keyed by normalised phone number.
-// Record shape: { name, phone, salt, hash, createdAt, lastLogin, logins }
+// One Netlify Blobs store per night (see events.mjs), keyed by normalised
+// phone number.
+// Record shape: { name, phone, salt, hash, createdAt, lastLogin, logins, indexed, feedback? }
 //
 // region:      ap-southeast-2 (Sydney) — keep guest data in Australia.
 //              Netlify's default would be us-east-2. Do NOT change this
@@ -9,6 +10,6 @@ import { getStore } from '@netlify/blobs';
 //              migrate data, the store would simply appear empty.
 // consistency: strong — the duplicate check must always read the latest
 //              write, not an edge-cached copy.
-export function registrations() {
-  return getStore({ name: 'registrations', region: 'ap-southeast-2', consistency: 'strong' });
+export function registrations(ev) {
+  return getStore({ name: ev.store, region: 'ap-southeast-2', consistency: 'strong' });
 }

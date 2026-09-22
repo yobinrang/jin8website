@@ -32,6 +32,18 @@
   to = "/softopen_admin/:splat"
   status = 301
 
+# Saturday's invitation is the same page as Thursday's; the page reads its
+# own address to know which night it is.
+[[redirects]]
+  from = "/softopen_sat"
+  to = "/softopen/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/softopen_sat/*"
+  to = "/softopen/index.html"
+  status = 200
+
 # Secret pages: never indexed, never cached.
 [[headers]]
   for = "/softopen/*"
@@ -41,6 +53,18 @@
 
 [[headers]]
   for = "/softopen_admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/softopen_sat"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/softopen_sat/*"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"
     Cache-Control = "no-store"

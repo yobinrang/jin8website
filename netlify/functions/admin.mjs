@@ -3,19 +3,20 @@ import { safeEqual } from '../lib/crypto.mjs';
 import { registrations } from '../lib/store.mjs';
 import { formatPhone } from '../lib/phone.mjs';
 import { readIndex, removeFromIndex, reconcileIndex } from '../lib/index.mjs';
+import { getEvent } from '../lib/events.mjs';
 
-// GET /api/admin  (header: x-admin-key: <ADMIN_KEY>)
-//   Lists everyone who has registered. Passcode hashes are never returned.
-//   Keys come from our own strongly-consistent index, unioned with the
-//   store's (eventually consistent) list() as a self-healing fallback.
-// DELETE /api/admin?phone=+61…   removes one registration.
-// GET /api/admin?diag=1&probe=+61…   diagnostic: what each store can see.
+// GET    /api/admin?event=thu|sat             one night's guest list (never returns PIN hashes)
+// DELETE /api/admin?event=thu|sat&phone=+61…  removes one registration from that night
+// GET    /api/admin?event=…&diag=1&probe=+61… diagnostic: what the stores can see
+//
+// Keys come from our own strongly-consistent index, unioned with the store's
+// list() as a self-healing fallback.
 
 // The credential is ADMIN_PIN (Robin's PIN), sent in the x-admin-key header.
 // Brute-force protection is per device: 5 wrong attempts from one IP freeze
-// that IP for 15 minutes; other devices are unaffected. (If ADMIN_KEY is set
-// to a long random value, it is also accepted, without lockout; a short
-// ADMIN_KEY is ignored so a 6-digit value can never bypass the lockout.)
+// that IP for 15 minutes; other devices are unaffected. (A long ADMIN_KEY,
+// 16+ chars, is also accepted without lockout if ever set; a short one is
+// ignored so it can never bypass the lockout.)
 const LOCK_MAX = 5;
 const LOCK_MS = 15 * 60 * 1000;
 
@@ -66,28 +67,26 @@ export default async (req, context) => {
   const auth = await authorise(req, context);
   if (!auth.ok) return json(auth.status, { error: auth.error });
 
-  const store = registrations();
+  const ev = getEvent(req);
+  if (!ev) return json(400, { error: 'Unknown event.' });
+
+  const store = registrations(ev);
   const url = new URL(req.url);
 
   if (req.method === 'GET' && url.searchParams.get('diag')) {
-    const { getStore } = await import('@netlify/blobs');
-    const pinned = getStore({ name: 'registrations', region: 'ap-southeast-2', consistency: 'strong' });
-    const dflt = getStore({ name: 'registrations', consistency: 'strong' });
     const probe = url.searchParams.get('probe');
-    const [lp, ld, idx] = await Promise.all([pinned.list(), dflt.list(), readIndex()]);
-    const [gp, gd] = probe
-      ? await Promise.all([pinned.get(probe, { type: 'json' }), dflt.get(probe, { type: 'json' })])
-      : [null, null];
+    const [listed, idx, found] = await Promise.all([
+      store.list().then((r) => r.blobs.map((b) => b.key)).catch((e) => `error: ${e.message}`),
+      readIndex(ev),
+      probe ? store.get(probe, { type: 'json' }).then((r) => !!r) : Promise.resolve(null),
+    ]);
     return json(200, {
+      event: ev.id,
+      store: ev.store,
       ip: clientIp(req, context),
-      ipSources: {
-        contextIp: (context && context.ip) || null,
-        nfHeader: req.headers.get('x-nf-client-connection-ip'),
-        forwardedFor: req.headers.get('x-forwarded-for'),
-      },
       index: idx.phones,
-      pinned: { region: 'ap-southeast-2', listed: lp.blobs.map((b) => b.key), probeFound: !!gp },
-      default: { region: 'default (us-east-2)', listed: ld.blobs.map((b) => b.key), probeFound: !!gd },
+      listed,
+      probeFound: found,
     });
   }
 
@@ -95,14 +94,14 @@ export default async (req, context) => {
     const phone = url.searchParams.get('phone');
     if (!phone) return json(400, { error: 'phone required' });
     await store.delete(phone);
-    try { await removeFromIndex(phone); } catch (e) { console.error('index remove failed', phone, e); }
-    return json(200, { ok: true, deleted: phone });
+    try { await removeFromIndex(ev, phone); } catch (e) { console.error('index remove failed', ev.id, phone, e); }
+    return json(200, { ok: true, event: ev.id, deleted: phone });
   }
 
   if (req.method !== 'GET') return json(405, { error: 'Method not allowed' });
 
   const [{ phones: indexed }, listed] = await Promise.all([
-    readIndex(),
+    readIndex(ev),
     store.list().then((r) => r.blobs.map((b) => b.key)).catch(() => []),
   ]);
   const keys = [...new Set([...indexed, ...listed])];
@@ -111,13 +110,14 @@ export default async (req, context) => {
   const rows = fetched.filter(([, rec]) => rec).map(([, rec]) => rec);
   const liveKeys = fetched.filter(([, rec]) => rec).map(([k]) => k);
 
-  // Self-heal: index should equal the set of keys that actually exist.
+  // Self-heal: the index should equal the set of keys that actually exist.
   const indexStale = liveKeys.length !== indexed.length || liveKeys.some((k) => !indexed.includes(k));
-  if (indexStale) reconcileIndex(liveKeys).catch((e) => console.error('index reconcile failed', e));
+  if (indexStale) reconcileIndex(ev, liveKeys).catch((e) => console.error('index reconcile failed', ev.id, e));
 
   rows.sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1));
 
   return json(200, {
+    event: { id: ev.id, name: ev.name, date: ev.date },
     count: rows.length,
     feedbackCount: rows.filter((r) => r.feedback).length,
     registrations: rows.map(({ name, phone, createdAt, lastLogin, logins, feedback }) => ({

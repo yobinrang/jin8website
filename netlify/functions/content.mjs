@@ -77,13 +77,21 @@ const MENU = {
       sub: 'Tastes familiar to you.',
       numbered: false,
       placeholder: 'To be announced on the day of the soft opening.',
+      items: [
+        { name: 'Sour', desc: 'With the spirit of your choice.' },
+        { name: 'Negroni' },
+        { name: 'Margarita' },
+        { name: 'Espresso Martini' },
+      ],
+    },
+    {
+      id: 'rest',
+      label: 'Also Pouring',
+      title: 'The <em>Rest</em>',
+      sub: 'Everything else behind the bar.',
+      numbered: false,
+      placeholder: 'To be announced on the day of the soft opening.',
       groups: [
-        { title: 'Cocktails', items: [
-          { name: 'Sour', desc: 'With the spirit of your choice.' },
-          { name: 'Negroni' },
-          { name: 'Margarita' },
-          { name: 'Espresso Martini' },
-        ] },
         { title: 'Spirits', items: [
           { name: 'From the back bar', desc: 'Ask the team what we’re pouring.', noPrice: true },
         ] },
@@ -94,7 +102,7 @@ const MENU = {
           { name: 'Old Snow' },
         ] },
         { title: 'Mocktail', items: [
-          { name: 'Bartender’s choice', desc: 'Made to your taste.' },
+          { name: 'Made to your taste', desc: 'Tell us what you like and we’ll build it.' },
         ] },
       ],
     },

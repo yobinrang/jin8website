@@ -21,6 +21,8 @@ function eventCopy(ev) {
     notes: [
       `Doors open at ${ev.doors}. Come whenever suits you.`,
       'You’ll get a first look at our signatures, plus a short list of classics.',
+      'Everything on the menu is 25% off for the night.',
+      'Our food menu isn’t ready yet, so please don’t arrive on an empty stomach. We’ll be serving bar snacks.',
       'We’re still testing how the bar runs, so bear with us while we get it right.',
       'The soft opening is invite only, and the list is closed.',
     ],
@@ -40,9 +42,29 @@ const ABOUT = {
 // Shown on the page above the lists, even while the lists are hidden.
 // The drink data stays here so menuRevealed can be flipped on the day.
 // A section has either `items` or `groups: [{ title, items }]`.
-// Item fields: num, name, cn (汉字), pinyin, tag, desc, price, noPrice.
+// Item fields: num, name, cn (汉字), pinyin, tag, desc (short story),
+//              pour (flavour, opening · heart · backbone), strength (ABV and
+//              allergens), price, noPrice.
+// Prices below are the standard menu prices. The soft-opening discount is
+// applied automatically for display, so guests see what they actually pay
+// with the full price struck through beside it. Set DISCOUNT to 0 when the
+// soft opening ends and the menu reverts to full prices on its own.
+const DISCOUNT = 0.25;
+
+function money(n) {
+  return '$' + (Number.isInteger(n) ? String(n) : n.toFixed(2));
+}
+
+function withDiscount(item) {
+  const m = /^\$(\d+(?:\.\d+)?)$/.exec(item.price || '');
+  if (!DISCOUNT || !m) return item;                 // "Ask us" and the like pass through
+  const full = Number(m[1]);
+  return { ...item, price: money(full * (1 - DISCOUNT)), was: money(full) };
+}
+
 const MENU = {
-  note: '25% off all drinks for the soft opening',
+  note: 'Soft opening discount · 25% off every drink',
+  priceHeader: 'Soft opening prices',
   sections: [
     {
       id: 'the8',
@@ -52,22 +74,35 @@ const MENU = {
       numbered: true,
       placeholder: 'To be announced on the day of the soft opening.',
       items: [
-        { num: '01', name: 'Spirits of Shanxi', cn: '醉太行', pinyin: 'Zuì Tài Háng', tag: 'The Genesis',
-          desc: 'Named after the towering Taihang Mountains, this is a bold, unapologetic introduction to the complex, savoury depth of traditional northern spirits. It brings the raw, rugged terroir of Shanxi straight to the glass.' },
-        { num: '02', name: 'The Offering', cn: '敬山河', pinyin: 'Jìng Shān Hé', tag: 'The Ritual',
-          desc: 'Inspired by the ancient custom of pouring a drink to the earth and sky, this cocktail pays respect to the natural elements that define our bar. A grounded, elemental drink that bridges ancient tradition with modern craft.' },
-        { num: '03', name: 'Live Long', cn: '长生', pinyin: 'Cháng Shēng', tag: 'The Awakening',
-          desc: 'The first half of a traditional blessing. A bright, revitalising mix drawing on time-honoured botanicals. It is designed to awaken the palate and symbolise vitality and new beginnings.' },
-        { num: '04', name: 'Love Long', cn: '长情', pinyin: 'Cháng Qíng', tag: 'The Connection',
-          desc: 'The second half of the blessing. Where Live Long is bright, this drink is deep, lingering and romantic. It acts as the perfect counterpart, celebrating the enduring connections and conversations shared across the bar.' },
-        { num: '05', name: 'Wongka', cn: '花样年华', pinyin: 'Huāyàng Niánhuá', tag: 'The Secret Recipe',
-          desc: 'A slow-burning tribute to fleeting time. This heavy, spirit-forward classic is anchored by roasted cacao, a touch of eccentric magic hidden beneath a dark, moody, cinematic exterior.' },
-        { num: '06', name: 'Violet Haze', cn: '紫烟', pinyin: 'Zǐ Yān', tag: 'The Atmosphere',
-          desc: 'Evoking the ethereal, flowing energy of traditional ink-wash paintings colliding with late-night neon. A visually striking, highly aromatic drink that drifts softly across the palate like evening mist.' },
-        { num: '07', name: 'Floating Fields', cn: '云野', pinyin: 'Yún Yě', tag: 'The Escape',
-          desc: 'A delicate, weightless palate cleanser before the night concludes. Inspired by sprawling eastern landscapes, it offers a surreal, floating sensation that elevates the senses.' },
-        { num: '08', name: 'Sweet Home', cn: '故里', pinyin: 'Gù Lǐ', tag: 'The Reunion',
-          desc: 'The perfect closing scene. Inspired by tangyuan, the traditional sweet glutinous rice balls eaten to symbolise harmony and family. A rich, comforting, dessert-like finish that brings the entire journey full circle.' },
+        { num: '01', name: 'Spirits of Shanxi', cn: '醉太行', pinyin: 'Zuì Tài Háng', tag: 'The Genesis', price: '$32',
+          desc: 'Named for the Taihang Mountains, where the terroir of Shanxi meets the glass.',
+          pour: 'Chrysanthemum house soda · hawthorn, jujube, goji · house four-fenjiu blend' },
+        { num: '02', name: 'The Offering', cn: '敬山河', pinyin: 'Jìng Shān Hé', tag: 'The Ritual', price: '$26',
+          desc: 'After the old custom of pouring a drink to the earth and sky.',
+          pour: 'Tart mandarin, citrus · chen pi brine, coriander, white pepper · cucumber, red fenjiu' },
+        { num: '03', name: 'Live Long', cn: '长生', pinyin: 'Cháng Shēng', tag: 'The Awakening', price: '$26',
+          desc: 'The first half of a blessing, built to wake the palate.',
+          pour: 'White peach, fresh floral · earthy oolong, warming ginger, Martell VS · fenjiu Panama, vanilla oak, citrus',
+          strength: '≈13% ABV' },
+        { num: '04', name: 'Love Long', cn: '长情', pinyin: 'Cháng Qíng', tag: 'The Connection', price: '$28',
+          desc: 'The second half of that blessing, deep and lingering.',
+          pour: 'Red dragonfruit, soft floral · silken, tart ruby hibiscus · dry gin, blue fenjiu, botanicals',
+          strength: '≈12% ABV · contains egg white' },
+        { num: '05', name: 'Wongka', cn: '花样年华', pinyin: 'Huāyàng Niánhuá', tag: 'The Secret Recipe', price: '$28',
+          desc: 'A slow-burning tribute to fleeting time, anchored by roasted cacao.',
+          pour: 'Toasted cacao, smoke · soft spice, dark herbs · Panama black fenjiu 20 year, Punt e Mes',
+          strength: '≈22% ABV' },
+        { num: '06', name: 'Violet Haze', cn: '紫烟', pinyin: 'Zǐ Yān', tag: 'The Atmosphere', price: '$29',
+          desc: 'Ink-wash painting meeting late-night neon.',
+          pour: 'Floral, lemon myrtle · violette, Lillet Blanc · Panama fenjiu 20 year' },
+        { num: '07', name: 'Floating Fields', cn: '云野', pinyin: 'Yún Yě', tag: 'The Escape', price: '$28',
+          desc: 'A weightless pause before the night closes.',
+          pour: 'Green, yuzu citrus · roasted rice, velvet matcha · Silk Road fenjiu, grain',
+          strength: '≈17% ABV' },
+        { num: '08', name: 'Sweet Home', cn: '故里', pinyin: 'Gù Lǐ', tag: 'The Reunion', price: '$26',
+          desc: 'After tangyuan, the sweet rice balls eaten for family and harmony.',
+          pour: 'Creamy coconut, glutinous rice · black sesame · red fenjiu, meijiu rose',
+          strength: 'Contains sesame' },
       ],
     },
     {
@@ -78,10 +113,15 @@ const MENU = {
       numbered: false,
       placeholder: 'To be announced on the day of the soft opening.',
       items: [
-        { name: 'Sour', desc: 'With the spirit of your choice.' },
-        { name: 'Negroni' },
-        { name: 'Margarita' },
-        { name: 'Espresso Martini' },
+        { name: 'Your favourite sour', price: '$24',
+          pour: 'Fresh lemon, bright citrus · rich demerara, silken foam · Redbreast 12 year, aromatic bitters',
+          strength: 'Contains egg white' },
+        { name: 'Negroni', price: '$24',
+          pour: 'Expressed orange peel, citrus oils · Campari, bittersweet herbal botanicals · Four Pillars gin, Carpano Antica' },
+        { name: 'Margarita', price: '$24',
+          pour: 'Crisp fresh lime, sea salt · bright agave, Cointreau · Cascahuín Blanco tequila' },
+        { name: 'Espresso Martini', price: '$24',
+          pour: 'Fresh espresso crema · Mr Black cold brew, dark cacao · Haku vodka, demerara' },
       ],
     },
     {
@@ -93,16 +133,24 @@ const MENU = {
       placeholder: 'To be announced on the day of the soft opening.',
       groups: [
         { title: 'Spirits', items: [
-          { name: 'From the back bar', desc: 'Ask the team what we’re pouring.', noPrice: true },
+          { name: 'From the back bar', price: 'Ask us',
+            desc: 'Ask the team what we’re pouring.',
+            pour: 'Craft baijiu · single malts, agave, rums · the whole back bar' },
         ] },
         { title: 'Wine', items: [
-          { name: 'Last Warrior' },
+          { name: 'Silver Heights ‘Last Warrior’ 2022', price: '$15',
+            desc: 'Ningxia, China. Hand-harvested at the foot of the Helan Mountains.',
+            pour: 'Wild-fermented, earthy red blend' },
         ] },
         { title: 'Beer', items: [
-          { name: 'Old Snow' },
+          { name: 'Old Snow', cn: '老雪花', pinyin: 'Lǎo Xuě Huā', price: '$14',
+            pour: 'Crisp malt, light floral, clean and refreshing',
+            strength: '4.7% · 640ml sharing bottle' },
         ] },
         { title: 'Mocktail', items: [
-          { name: 'Made to your taste', desc: 'Tell us what you like and we’ll build it.' },
+          { name: 'Made to your taste', price: 'Ask us',
+            desc: 'Tell us what you like and we’ll build it.',
+            pour: 'Fresh fruit, citrus and botanicals · zero proof' },
         ] },
       ],
     },
@@ -141,7 +189,14 @@ export default async (req) => {
 
   const menu = {
     ...MENU,
-    sections: MENU.sections.map((s) => (ev.menuRevealed ? s : { ...s, items: [], groups: [] })),
+    sections: MENU.sections.map((s) => {
+      if (!ev.menuRevealed) return { ...s, items: [], groups: [] };
+      return {
+        ...s,
+        items: (s.items || []).map(withDiscount),
+        groups: (s.groups || []).map((g) => ({ ...g, items: g.items.map(withDiscount) })),
+      };
+    }),
   };
 
   return json(200, {

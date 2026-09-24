@@ -21,7 +21,7 @@ function eventCopy(ev) {
     notes: [
       `Doors open at ${ev.doors}. Come whenever suits you.`,
       'You’ll get a first look at our signatures, plus a short list of classics.',
-      'Everything on the menu is 25% off for the night.',
+      'Cocktails, wine and beer are 25% off for the night. Back bar spirits and mocktails are priced as shown.',
       'Our food menu isn’t ready yet, so please don’t arrive on an empty stomach. We’ll be serving bar snacks.',
       'We’re still testing how the bar runs, so bear with us while we get it right.',
       'The soft opening is invite only, and the list is closed.',
@@ -57,13 +57,15 @@ function money(n) {
 
 function withDiscount(item) {
   const m = /^\$(\d+(?:\.\d+)?)$/.exec(item.price || '');
-  if (!DISCOUNT || !m) return item;                 // "Ask us" and the like pass through
+  // noDiscount items (back bar spirits, mocktails) and non-numeric prices
+  // such as "Ask us" are shown exactly as priced.
+  if (!DISCOUNT || item.noDiscount || !m) return item;
   const full = Number(m[1]);
   return { ...item, price: money(full * (1 - DISCOUNT)), was: money(full) };
 }
 
 const MENU = {
-  note: 'Soft opening discount · 25% off every drink',
+  note: 'Soft opening discount · 25% off cocktails, wine and beer',
   priceHeader: 'Soft opening prices',
   sections: [
     {
@@ -135,7 +137,8 @@ const MENU = {
         { title: 'Spirits', items: [
           { name: 'From the back bar', price: 'Ask us',
             desc: 'Ask the team what we’re pouring.',
-            pour: 'Craft baijiu · single malts, agave, rums · the whole back bar' },
+            pour: 'Craft baijiu · single malts, agave, rums · the whole back bar',
+            strength: 'Not part of the discount', noDiscount: true },
         ] },
         { title: 'Wine', items: [
           { name: 'Silver Heights ‘Last Warrior’ 2022', price: '$15',
@@ -148,9 +151,10 @@ const MENU = {
             strength: '4.7% · 640ml sharing bottle' },
         ] },
         { title: 'Mocktail', items: [
-          { name: 'Made to your taste', price: 'Ask us',
+          { name: 'Made to your taste', price: '$10',
             desc: 'Tell us what you like and we’ll build it.',
-            pour: 'Fresh fruit, citrus and botanicals · zero proof' },
+            pour: 'Fresh fruit, citrus and botanicals · zero proof',
+            strength: 'Not part of the discount', noDiscount: true },
         ] },
       ],
     },

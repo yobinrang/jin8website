@@ -5,21 +5,6 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
-# /menu is INACTIVE during the soft opening: bounce to the Coming Soon page.
-# The menu lives inside the gated invitation for now. Delete these two
-# redirect blocks at full launch to make /menu (and the printed QR) live.
-[[redirects]]
-  from = "/menu"
-  to = "/"
-  status = 302
-  force = true
-
-[[redirects]]
-  from = "/menu/*"
-  to = "/"
-  status = 302
-  force = true
-
 # The invitation used to live at the long hex address; keep it working.
 [[redirects]]
   from = "/soft-opening-bb877a1e5e6b/*"
@@ -67,6 +52,15 @@
   for = "/softopen_sat/*"
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-store"
+
+# The public menu behind the QR code in the bar. Not indexed while the
+# soft-opening prices are showing; always fetched fresh so a price change
+# reaches the tables on the next scan.
+[[headers]]
+  for = "/menu/*"
+  [headers.values]
+    X-Robots-Tag = "noindex"
     Cache-Control = "no-store"
 
 # Cache static assets aggressively.

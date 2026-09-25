@@ -102,7 +102,7 @@ export default async (req, context) => {
 
   if (req.method !== 'GET') return json(405, { error: 'Method not allowed' });
 
-  const [{ phones: indexed }, listed] = await Promise.all([
+  const [{ phones: indexed, raw: indexRaw }, listed] = await Promise.all([
     readIndex(ev),
     store.list().then((r) => r.blobs.map((b) => b.key)).catch(() => []),
   ]);
@@ -115,8 +115,12 @@ export default async (req, context) => {
   const rows = fetched.filter(([, rec]) => rec).map(([, rec]) => rec);
   const liveKeys = fetched.filter(([, rec]) => rec).map(([k]) => k);
 
-  // Self-heal: the index should equal the set of keys that actually exist.
-  const indexStale = liveKeys.length !== indexed.length || liveKeys.some((k) => !indexed.includes(k));
+  // Self-heal: the index should equal the set of keys that actually exist,
+  // and the stored copy should already be in that form. Checking the stored
+  // copy too is what clears out keys we only deduplicate on read.
+  const indexStale = liveKeys.length !== indexed.length
+    || liveKeys.some((k) => !indexed.includes(k))
+    || indexRaw.length !== indexed.length;
   if (indexStale) reconcileIndex(ev, liveKeys).catch((e) => console.error('index reconcile failed', ev.id, e));
 
   rows.sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1));

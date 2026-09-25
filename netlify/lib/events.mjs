@@ -21,7 +21,7 @@ export const EVENTS = {
     indexStore: 'registrations-index',
     capacity: 40,
     menuRevealed: true,
-    feedbackOpen: false,
+    feedbackOpen: true,
     feedbackOpensOn: 'Friday 25 September',
   },
   sat: {

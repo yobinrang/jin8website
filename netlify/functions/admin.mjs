@@ -1,7 +1,7 @@
 import { json } from '../lib/http.mjs';
 import { safeEqual } from '../lib/crypto.mjs';
 import { registrations } from '../lib/store.mjs';
-import { formatPhone } from '../lib/phone.mjs';
+import { formatPhone, canonicalPhoneKey } from '../lib/phone.mjs';
 import { readIndex, removeFromIndex, reconcileIndex } from '../lib/index.mjs';
 import { getEvent } from '../lib/events.mjs';
 
@@ -85,13 +85,15 @@ export default async (req, context) => {
       store: ev.store,
       ip: clientIp(req, context),
       index: idx.phones,
+      indexStored: idx.raw.length,   // bigger than index.length ⇒ stored copy still needs repairing
       listed,
       probeFound: found,
     });
   }
 
   if (req.method === 'DELETE') {
-    const phone = url.searchParams.get('phone');
+    // searchParams turns "+" into a space, so "+61…" arrives as " 61…".
+    const phone = canonicalPhoneKey(url.searchParams.get('phone'));
     if (!phone) return json(400, { error: 'phone required' });
     await store.delete(phone);
     try { await removeFromIndex(ev, phone); } catch (e) { console.error('index remove failed', ev.id, phone, e); }
@@ -104,7 +106,10 @@ export default async (req, context) => {
     readIndex(ev),
     store.list().then((r) => r.blobs.map((b) => b.key)).catch(() => []),
   ]);
-  const keys = [...new Set([...indexed, ...listed])];
+  // Canonicalise before the union. list() can return a key whose "+" has
+  // become a space; both forms reach the same record, so without this every
+  // guest is fetched and counted twice and reconcile writes both back.
+  const keys = [...new Set([...indexed, ...listed].map(canonicalPhoneKey).filter(Boolean))];
 
   const fetched = await Promise.all(keys.map(async (k) => [k, await store.get(k, { type: 'json' })]));
   const rows = fetched.filter(([, rec]) => rec).map(([, rec]) => rec);

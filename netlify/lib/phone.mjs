@@ -20,6 +20,17 @@ export function normalizePhone(raw) {
   return s;
 }
 
+// Force a storage key back to canonical E.164.
+//
+// Keys make a round trip through URLs, where "+" decodes to a space, so the
+// same guest can come back as "+61435759233" or " 61435759233". Both forms
+// reach the same record, so without this every guest gets counted twice.
+export function canonicalPhoneKey(key) {
+  if (typeof key !== 'string') return null;
+  const digits = key.replace(/\D/g, '');
+  return digits ? '+' + digits : null;
+}
+
 // Pretty form for display: +61 412 345 678
 export function formatPhone(e164) {
   if (!e164) return '';

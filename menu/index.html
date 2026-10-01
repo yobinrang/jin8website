@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Cormorant+SC:wght@300;400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Noto+Serif+SC:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -35,8 +36,8 @@
   /* The bar itself, sitting behind the top of the page */
   .backdrop {
     position: fixed; inset: 0 0 auto 0; height: 78vh; z-index: 0;
-    background-image: url('../assets/bar-interior.jpg');
-    background-size: cover; background-position: center 55%;
+    background-image: url('../assets/menu-cocktail.jpg');
+    background-size: cover; background-position: center 45%;
     opacity: 0; transform: scale(1.08);
     animation: backdropIn 2.6s 0.25s var(--ease) forwards;
   }
@@ -81,8 +82,14 @@
     color: var(--gold); opacity: 0.88; display: inline-flex; align-items: center; gap: 14px; margin-bottom: 16px;
   }
   .kicker::before, .kicker::after { content: ''; width: 22px; height: 1px; background: var(--gold); opacity: 0.5; }
+  #kicker .sep { opacity: 0.6; margin: 0 4px; }
+  #kicker .han { font-family: 'Ma Shan Zheng', 'Noto Serif SC', serif; letter-spacing: 0.06em; font-size: 1.5em; text-transform: none; }
+  #kicker::before, #kicker::after { display: none; }
+  #kicker { white-space: nowrap; align-items: baseline; gap: 0; }
+  #kicker .en { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.7em; letter-spacing: 0.02em; text-transform: none; }
   h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(44px, 13vw, 62px); font-weight: 300; line-height: 1; letter-spacing: -0.02em; }
   h1 em { font-style: italic; color: var(--gold); }
+  #title .pre { display: block; font-size: 0.42em; letter-spacing: 0.06em; line-height: 1.2; margin-bottom: 10px; opacity: 0.9; }
   .sub { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 17px; opacity: 0.7; margin-top: 14px; }
   .deal {
     display: inline-block; margin-top: 22px; padding: 10px 18px;
@@ -137,7 +144,7 @@
   .was { font-family: 'Cormorant Garamond', serif; font-size: 14px; opacity: 0.4; text-decoration: line-through; flex: 0 0 auto; white-space: nowrap; }
   .price { font-family: 'Cormorant Garamond', serif; font-size: 17px; color: var(--gold); flex: 0 0 auto; white-space: nowrap; margin-left: 8px; }
   .cn { margin-top: 4px; padding-left: 31px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; color: var(--gold); }
-  .cn .hanzi { font-family: 'Noto Serif SC', serif; font-size: 16px; letter-spacing: 0.08em; }
+  .cn .hanzi { font-family: 'Ma Shan Zheng', 'Noto Serif SC', serif; font-size: 19px; letter-spacing: 0.04em; white-space: nowrap; }
   .cn .pinyin { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 14.5px; opacity: 0.75; }
   .tag { margin-top: 9px; padding-left: 31px; font-family: 'Cormorant SC', serif; font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); opacity: 0.6; }
   .desc { margin-top: 5px; padding-left: 31px; font-size: 14.5px; line-height: 1.6; opacity: 0.74; }
@@ -164,6 +171,12 @@
   [hidden] { display: none !important; }
 
   /* ── ENTRANCE ── */
+  /* Menu switched off (MENU_ONLINE = false): a short note instead of the lists */
+  .paused { text-align: center; margin-top: 46px; padding: 34px 8px 6px; border-top: 1px solid var(--rule); }
+  .paused p { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 21px; line-height: 1.5; opacity: 0.82; max-width: 400px; margin: 0 auto; }
+  .paused a { display: inline-block; margin-top: 26px; font-family: 'Cormorant SC', serif; font-size: 11px; letter-spacing: 0.32em; padding-left: 0.32em; text-transform: uppercase; color: var(--cream); text-decoration: none; opacity: 0.8; padding-bottom: 4px; border-bottom: 1px solid rgba(201,169,97,0.5); transition: color 0.25s, opacity 0.25s; }
+  .paused a:hover { color: var(--gold); opacity: 1; }
+
   .rise { opacity: 0; transform: translateY(22px); }
   .rise.in { opacity: 1; transform: none; transition: opacity 0.85s var(--ease), transform 0.85s var(--ease); }
 
@@ -196,6 +209,7 @@
   <nav class="jump rise" id="jump" hidden></nav>
 
   <p class="loading" id="loading">Pouring…</p>
+  <div class="paused rise" id="paused" hidden><p id="p-msg"></p><a id="p-home"></a></div>
   <div id="menu"></div>
 
   <footer class="foot rise" id="foot" hidden>
@@ -242,7 +256,6 @@
       var row = el('div', 'item-row');
       if (s.numbered && it.num) row.appendChild(el('span', 'num', it.num));
       var name = el('span', 'name'); name.innerHTML = it.name; row.appendChild(name);
-      if (it.was) row.appendChild(el('span', 'was', it.was));
       if (it.price) row.appendChild(el('span', 'price', it.price));
       li.appendChild(row);
       if (it.cn || it.pinyin) {
@@ -260,13 +273,37 @@
     return ul;
   }
 
-  function render(data) {
-    var m = data.menu, h = data.header, f = data.footer;
-
-    $('kicker').textContent = h.kicker;
+  // The menu is switched off: header, a short note, the footer. No lists.
+  function renderPaused(data) {
+    var h = data.header, f = data.footer, p = data.paused || {};
+    $('kicker').innerHTML = h.kicker;
     $('title').innerHTML = h.title;
     $('sub').textContent = h.sub;
-    if (m.note) { $('deal').textContent = m.note; $('deal').hidden = false; }
+    $('p-msg').textContent = p.message || '';
+    if (p.home) { $('p-home').textContent = p.home.label; $('p-home').href = p.home.href; } else { $('p-home').hidden = true; }
+    $('f-card').textContent = f.card || '';
+    $('f-food').hidden = true;
+    $('f-addr').textContent = f.address || '';
+    var ig = $('f-ig'); ig.textContent = f.handle || ''; ig.href = f.instagram || '#';
+    $('loading').hidden = true;
+    $('paused').hidden = false;
+    $('foot').hidden = false;
+    requestAnimationFrame(function () {
+      setTimeout(function () { $('curtain').classList.add('lift'); }, reduce ? 0 : 520);
+      [].slice.call(document.querySelectorAll('.head .rise')).concat([$('paused'), $('foot')]).forEach(function (n, i) {
+        setTimeout(function () { n.classList.add('in'); }, reduce ? 0 : 700 + i * 110);
+      });
+    });
+  }
+
+  function render(data) {
+    if (data.hidden) return renderPaused(data);
+    var m = data.menu, h = data.header, f = data.footer;
+
+    $('kicker').innerHTML = h.kicker;
+    $('title').innerHTML = h.title;
+    $('sub').textContent = h.sub;
+    if (m.note) { $('deal').textContent = m.note + (h.sub ? ' · ' + h.sub : ''); $('deal').hidden = false; $('sub').hidden = true; }
 
     var jump = $('jump'); jump.textContent = '';
     var root = $('menu'); root.textContent = '';
@@ -298,7 +335,7 @@
     });
 
     $('f-card').textContent = f.card;
-    $('f-food').textContent = f.food;
+    $('f-food').hidden = true;
     $('f-addr').textContent = f.address;
     var ig = $('f-ig'); ig.textContent = f.handle; ig.href = f.instagram;
 

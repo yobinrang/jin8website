@@ -2,6 +2,13 @@
 // public menu people scan in the bar (/api/menu). One source of truth, so
 // the two can never drift apart.
 
+// ── Digital menu on/off ──────────────────────────────────────────────────
+// One switch for the QR page (/menu), its data (/api/menu) and the menu
+// section of the invitation pages. false shows a "printed menu for now" note
+// instead and keeps the drinks off the server's responses.
+// On again from 1 Oct 2026 (Robin), with the extended soft opening prices.
+export const MENU_ONLINE = true;
+
 // ── Menu (same both nights) ──────────────────────────────────────────────
 // Shown on the page above the lists, even while the lists are hidden.
 // The drink data stays here so menuRevealed can be flipped on the day.
@@ -10,10 +17,11 @@
 //              pour (flavour, opening · heart · backbone), strength (ABV and
 //              allergens), price, noPrice.
 // Prices below are the standard menu prices. The soft-opening discount is
-// applied automatically for display, so guests see what they actually pay
-// with the full price struck through beside it. Set DISCOUNT to 0 when the
-// soft opening ends and the menu reverts to full prices on its own.
-const DISCOUNT = 0.25;
+// applied automatically for display, rounded down to the whole dollar, so
+// guests see what they actually pay. (`was` still carries the full price;
+// the QR menu no longer shows it.) Set DISCOUNT to 0 when the soft opening
+// ends and the menu reverts to full prices on its own.
+const DISCOUNT = 0.15;   // extended soft opening, from Thu 1 Oct 2026 (was 0.25 for the invite nights)
 
 function money(n) {
   return '$' + (Number.isInteger(n) ? String(n) : n.toFixed(2));
@@ -25,11 +33,13 @@ function withDiscount(item) {
   // such as "Ask us" are shown exactly as priced.
   if (!DISCOUNT || item.noDiscount || !m) return item;
   const full = Number(m[1]);
-  return { ...item, price: money(full * (1 - DISCOUNT)), was: money(full) };
+  // Round to cents first so float noise can't drop a dollar (17.000000001 → 16).
+  const off = Math.floor(Math.round(full * (1 - DISCOUNT) * 100) / 100);
+  return { ...item, price: money(off), was: money(full) };
 }
 
 const MENU = {
-  note: 'Soft opening discount · 25% off cocktails, wine and beer',
+  note: '15% off',
   priceHeader: 'Soft opening prices',
   sections: [
     {
@@ -64,7 +74,7 @@ const MENU = {
         { num: '07', name: 'Floating Fields', cn: '云野', pinyin: 'Yún Yě', tag: 'The Escape', price: '$28',
           desc: 'A weightless pause before the night closes.',
           pour: 'Green, yuzu citrus · roasted rice, velvet matcha · Silk Road fenjiu, grain',
-          strength: '≈17% ABV' },
+          strength: '≈17% ABV · Contains dairy' },
         { num: '08', name: 'Sweet Home', cn: '故里', pinyin: 'Gù Lǐ', tag: 'The Reunion', price: '$26',
           desc: 'After tangyuan, the sweet rice balls eaten for family and harmony.',
           pour: 'Creamy coconut, glutinous rice · black sesame · red fenjiu, meijiu rose',
@@ -75,11 +85,11 @@ const MENU = {
       id: 'classics',
       label: 'The Canon',
       title: 'The <em>Classics</em>',
-      sub: 'Tastes familiar to you.',
+      sub: 'Tastes familiar to you. Don’t see yours? Just ask the bar.',
       numbered: false,
       placeholder: 'To be announced on the day of the soft opening.',
       items: [
-        { name: 'Your favourite sour', price: '$24',
+        { name: 'Your Favourite Sour', price: '$24',
           pour: 'Fresh lemon, bright citrus · rich demerara, silken foam · Redbreast 12 year, aromatic bitters',
           strength: 'Contains egg white' },
         { name: 'Negroni', price: '$24',
@@ -105,9 +115,8 @@ const MENU = {
             strength: 'Not part of the discount', noDiscount: true },
         ] },
         { title: 'Wine', items: [
-          { name: 'Silver Heights ‘Last Warrior’ 2022', price: '$15',
-            desc: 'Ningxia, China. Hand-harvested at the foot of the Helan Mountains.',
-            pour: 'Wild-fermented, earthy red blend' },
+          // Silver Heights 'Last Warrior' 2022 ($15) is out of stock. Robin: "just say ask the team".
+          { name: 'By the glass', desc: 'Ask the team.', noPrice: true },
         ] },
         { title: 'Beer', items: [
           { name: 'Old Snow', cn: '老雪花', pinyin: 'Lǎo Xuě Huā', price: '$14',

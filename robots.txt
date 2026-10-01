@@ -1,3 +1,2 @@
 User-agent: *
-Disallow: /preview-c040fd366f.html
 Disallow: /api/

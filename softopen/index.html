@@ -630,7 +630,7 @@
     $('foot-addr').textContent = ev.address || '';
     var mail = $('foot-mail'); mail.textContent = ev.contact || ''; mail.href = 'mailto:' + (ev.contact || '');
     if (ev.instagram) $('foot-ig').href = ev.instagram;
-    renderMenu(data.menu || {});
+    if (data.menu) { show($('menu-section')); renderMenu(data.menu); } else { hide($('menu-section')); }
     renderFeedback(data.feedback || {}, g.feedback || null);
     hide(loading); hide(gate); show(inside);
     window.scrollTo({ top: 0, behavior: 'instant' });

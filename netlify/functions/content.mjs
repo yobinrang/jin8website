@@ -3,7 +3,7 @@ import { readSession } from '../lib/session.mjs';
 import { registrations } from '../lib/store.mjs';
 import { formatPhone } from '../lib/phone.mjs';
 import { getEvent } from '../lib/events.mjs';
-import { buildMenu } from '../lib/menu.mjs';
+import { buildMenu, MENU_ONLINE } from '../lib/menu.mjs';
 
 // GET /api/content?event=thu|sat — the gated invitation content.
 // Only returned when the request carries a valid session cookie for that
@@ -70,7 +70,8 @@ export default async (req) => {
   const rec = await registrations(ev).get(session.p, { type: 'json' });
   if (!rec) return json(401, { error: 'Registration not found.' });
 
-  const menu = buildMenu({ revealed: ev.menuRevealed });
+  // null hides the whole menu section on the page (see MENU_ONLINE).
+  const menu = MENU_ONLINE ? buildMenu({ revealed: ev.menuRevealed }) : null;
 
   return json(200, {
     night: { id: ev.id, name: ev.name },

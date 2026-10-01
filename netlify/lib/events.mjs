@@ -34,7 +34,7 @@ export const EVENTS = {
     indexStore: 'registrations-sat-index',
     capacity: 40,
     menuRevealed: true,
-    feedbackOpen: false,
+    feedbackOpen: true,
     feedbackOpensOn: 'Sunday 27 September',
   },
 };

@@ -14,8 +14,8 @@ export const MENU_ONLINE = true;
 // The drink data stays here so menuRevealed can be flipped on the day.
 // A section has either `items` or `groups: [{ title, items }]`.
 // Item fields: num, name, cn (汉字), pinyin, tag, desc (short story),
-//              pour (flavour, opening · heart · backbone), strength (ABV and
-//              allergens), price, noPrice.
+//              pour (flavour, opening · heart · backbone), strength (allergens
+//              and serving notes; no ABV, per Robin 2 Oct 2026), price, noPrice.
 // Prices below are the standard menu prices. The soft-opening discount is
 // applied automatically for display, rounded down to the whole dollar, so
 // guests see what they actually pay. (`was` still carries the full price;
@@ -58,23 +58,21 @@ const MENU = {
           pour: 'Tart mandarin, citrus · chen pi brine, coriander, white pepper · cucumber, red fenjiu' },
         { num: '03', name: 'Live Long', cn: '长生', pinyin: 'Cháng Shēng', tag: 'The Awakening', price: '$26',
           desc: 'The first half of a blessing, built to wake the palate.',
-          pour: 'White peach, fresh floral · earthy oolong, warming ginger, Martell VS · fenjiu Panama, vanilla oak, citrus',
-          strength: '≈13% ABV' },
+          pour: 'White peach, fresh floral · earthy oolong, warming ginger, Martell VS · fenjiu Panama, vanilla oak, citrus' },
         { num: '04', name: 'Love Long', cn: '长情', pinyin: 'Cháng Qíng', tag: 'The Connection', price: '$28',
           desc: 'The second half of that blessing, deep and lingering.',
           pour: 'Red dragonfruit, soft floral · silken, tart ruby hibiscus · dry gin, blue fenjiu, botanicals',
-          strength: '≈12% ABV · contains egg white' },
+          strength: 'Contains egg white' },
         { num: '05', name: 'Wongka', cn: '花样年华', pinyin: 'Huāyàng Niánhuá', tag: 'The Secret Recipe', price: '$28',
           desc: 'A slow-burning tribute to fleeting time, anchored by roasted cacao.',
-          pour: 'Toasted cacao, smoke · soft spice, dark herbs · Panama black fenjiu 20 year, Punt e Mes',
-          strength: '≈22% ABV' },
+          pour: 'Toasted cacao, smoke · soft spice, dark herbs · Panama black fenjiu 20 year, Punt e Mes' },
         { num: '06', name: 'Violet Haze', cn: '紫烟', pinyin: 'Zǐ Yān', tag: 'The Atmosphere', price: '$29',
           desc: 'Ink-wash painting meeting late-night neon.',
           pour: 'Floral, lemon myrtle · violette, Lillet Blanc · Panama fenjiu 20 year' },
         { num: '07', name: 'Floating Fields', cn: '云野', pinyin: 'Yún Yě', tag: 'The Escape', price: '$28',
           desc: 'A weightless pause before the night closes.',
           pour: 'Green, yuzu citrus · roasted rice, velvet matcha · Silk Road fenjiu, grain',
-          strength: '≈17% ABV · Contains dairy' },
+          strength: 'Contains dairy' },
         { num: '08', name: 'Sweet Home', cn: '故里', pinyin: 'Gù Lǐ', tag: 'The Reunion', price: '$26',
           desc: 'After tangyuan, the sweet rice balls eaten for family and harmony.',
           pour: 'Creamy coconut, glutinous rice · black sesame · red fenjiu, meijiu rose',
@@ -121,7 +119,7 @@ const MENU = {
         { title: 'Beer', items: [
           { name: 'Old Snow', cn: '老雪花', pinyin: 'Lǎo Xuě Huā', price: '$14',
             pour: 'Crisp malt, light floral, clean and refreshing',
-            strength: '4.7% · 640ml sharing bottle' },
+            strength: '640ml sharing bottle' },
         ] },
         { title: 'Mocktail', items: [
           { name: 'Made to your taste', price: '$10',

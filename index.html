@@ -213,14 +213,14 @@
     .hero-seal {
       position: relative;
       display: inline-block;
-      width: 200px;
-      margin: 0 auto 36px;
+      width: 140px;   /* was 200px; 120px on phones (see the 900px breakpoint) */
+      margin: 0 auto 32px;
       animation: fadeUp 1.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-      filter: drop-shadow(0 0 32px rgba(255, 200, 100, 0.35)) drop-shadow(0 10px 40px rgba(0,0,0,0.5));
+      filter: drop-shadow(0 0 28px rgba(255, 200, 100, 0.35)) drop-shadow(0 8px 32px rgba(0,0,0,0.5));
     }
 
     .hero-seal img {
-      width: 200px;
+      width: 100%;
       height: auto;
       display: block;
     }
@@ -1055,6 +1055,7 @@
       .hero-meta { gap: 32px; flex-wrap: wrap; }
     }
     @media (max-width: 900px) {
+      .hero-seal { width: 120px; margin-bottom: 28px; }
       .hero-notice { margin-top: 32px; font-size: 10px; letter-spacing: 0.22em; padding: 11px 16px 11px calc(16px + 0.22em); }
       .soft-open { padding: 64px 16px; }
       .soft-open-card { padding: 40px 22px 38px; }

@@ -62,9 +62,8 @@ const MENU = {
           strength: 'Contains dairy' },   // milk-clarified; the clear drink still carries milk traces
         { num: '04', name: 'Love Long', cn: '长情', pinyin: 'Cháng Qíng', tag: 'The Connection', price: '$28',
           desc: 'The second half of that blessing, deep and lingering.',
-          pour: 'Red dragonfruit, soft floral · silken, tart ruby hibiscus · sloe gin, blue fenjiu, botanicals',
-          // Kept until confirmed: recipe ingredients list no egg white, but its method says to dry shake it in.
-          strength: 'Contains egg white' },
+          // No egg white (Robin, 4 Oct 2026; the recipe's "dry shake the egg white" step is an error).
+          pour: 'Red dragonfruit, soft floral · silken, tart ruby hibiscus · sloe gin, blue fenjiu, botanicals' },
         { num: '05', name: 'Wongka', cn: '花样年华', pinyin: 'Huāyàng Niánhuá', tag: 'The Secret Recipe', price: '$28',
           desc: 'A slow-burning tribute to fleeting time, anchored by roasted cacao.',
           pour: 'Toasted cacao, smoke · soft spice, dark herbs · Panama black fenjiu 20 year, Punt e Mes' },
@@ -73,7 +72,7 @@ const MENU = {
           pour: 'Floral, lemon myrtle · violette, Lillet Blanc · Panama fenjiu 20 year' },
         { num: '07', name: 'Floating Fields', cn: '云野', pinyin: 'Yún Yě', tag: 'The Escape', price: '$28',
           desc: 'A weightless pause before the night closes.',
-          pour: 'Green, yuzu citrus · roasted rice, velvet matcha · Silk Road fenjiu, grain',
+          pour: 'Green tea, roasted rice · velvet matcha cream · Silk Road fenjiu, grain',   // no yuzu for now (Robin, 4 Oct)
           strength: 'Contains dairy' },
         { num: '08', name: 'Sweet Home', cn: '故里', pinyin: 'Gù Lǐ', tag: 'The Reunion', price: '$26',
           desc: 'After tangyuan, the sweet rice balls eaten for family and harmony.',

@@ -28,6 +28,12 @@ function money(n) {
 }
 
 function withDiscount(item) {
+  // softPrice: a soft-opening price set by hand instead of the computed one.
+  // `price` stays the real price, so turning DISCOUNT off restores it.
+  if (DISCOUNT && item.softPrice) {
+    const { softPrice, ...rest } = item;
+    return { ...rest, price: softPrice, was: item.price };
+  }
   const m = /^\$(\d+(?:\.\d+)?)$/.exec(item.price || '');
   // noDiscount items (back bar spirits, mocktails) and non-numeric prices
   // such as "Ask us" are shown exactly as priced.
@@ -50,7 +56,7 @@ const MENU = {
       numbered: true,
       placeholder: 'To be announced on the day of the soft opening.',
       items: [
-        { num: '01', name: 'Spirits of Shanxi', cn: '醉太行', pinyin: 'Zuì Tài Háng', tag: 'The Genesis', price: '$32',
+        { num: '01', name: 'Spirits of Shanxi', cn: '醉太行', pinyin: 'Zuì Tài Háng', tag: 'The Genesis', price: '$36', softPrice: '$31',   // $36 is the real price; $31 during the soft opening (Robin, 27 Oct)
           desc: 'Named for the Taihang Mountains, where the terroir of Shanxi meets the glass.',
           pour: 'Chrysanthemum house soda · hawthorn, jujube, goji · house four-fenjiu blend' },
         { num: '02', name: 'The Offering', cn: '敬山河', pinyin: 'Jìng Shān Hé', tag: 'The Ritual', price: '$26',

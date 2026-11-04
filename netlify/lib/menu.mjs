@@ -66,17 +66,17 @@ const MENU = {
           desc: 'The first half of a blessing, built to wake the palate.',
           pour: 'White peach, fresh floral · earthy oolong, warming ginger, Hennessy VS · fenjiu Panama, vanilla oak, citrus',
           strength: 'Contains dairy' },   // milk-clarified; the clear drink still carries milk traces
-        { num: '04', name: 'Love Long', cn: '长情', pinyin: 'Cháng Qíng', tag: 'The Connection', price: '$28',
+        { num: '04', name: 'Love Long', cn: '长情', pinyin: 'Cháng Qíng', tag: 'The Connection', price: '$28', softPrice: '$24',   // soft-opening price set by hand (4 Nov 2026)
           desc: 'The second half of that blessing, deep and lingering.',
           // No egg white (Robin, 4 Oct 2026; the recipe's "dry shake the egg white" step is an error).
           pour: 'Red dragonfruit, soft floral · silken, tart ruby hibiscus · sloe gin, blue fenjiu, botanicals' },
-        { num: '05', name: 'Wongka', cn: '花样年华', pinyin: 'Huāyàng Niánhuá', tag: 'The Secret Recipe', price: '$28',
+        { num: '05', name: 'Wongka', cn: '花样年华', pinyin: 'Huāyàng Niánhuá', tag: 'The Secret Recipe', price: '$28', softPrice: '$24',   // soft-opening price set by hand (4 Nov 2026)
           desc: 'A slow-burning tribute to fleeting time, anchored by roasted cacao.',
           pour: 'Toasted cacao, smoke · soft spice, dark herbs · Panama black fenjiu 20 year, Punt e Mes' },
         { num: '06', name: 'Violet Haze', cn: '紫烟', pinyin: 'Zǐ Yān', tag: 'The Atmosphere', price: '$29',
           desc: 'Ink-wash painting meeting late-night neon.',
           pour: 'Floral, lemon myrtle · violette, Lillet Blanc · Panama fenjiu 20 year' },
-        { num: '07', name: 'Floating Fields', cn: '云野', pinyin: 'Yún Yě', tag: 'The Escape', price: '$28',
+        { num: '07', name: 'Floating Fields', cn: '云野', pinyin: 'Yún Yě', tag: 'The Escape', price: '$28', softPrice: '$24',   // soft-opening price set by hand (4 Nov 2026)
           desc: 'A weightless pause before the night closes.',
           pour: 'Green tea, roasted rice · velvet matcha cream · Silk Road fenjiu, grain',   // no yuzu for now (Robin, 4 Oct)
           strength: 'Contains dairy' },
@@ -94,12 +94,12 @@ const MENU = {
       numbered: false,
       placeholder: 'To be announced on the day of the soft opening.',
       items: [
-        { name: 'Your Favourite Sour', price: '$24',
+        { name: 'Your Favourite Sour', price: '$24', softPrice: '$21',   // soft-opening price set by hand (4 Nov 2026)
           pour: 'Fresh lemon, bright citrus · rich demerara, silken foam · Buffalo Trace bourbon, aromatic bitters',
           strength: 'Contains egg white' },
         { name: 'Negroni', price: '$24',
           pour: 'Expressed orange peel, citrus oils · Campari, bittersweet herbal botanicals · Four Pillars gin, Carpano Antica' },
-        { name: 'Margarita', price: '$24',
+        { name: 'Margarita', price: '$24', softPrice: '$21',   // soft-opening price set by hand (4 Nov 2026)
           pour: 'Crisp fresh lime, sea salt · bright agave, Cointreau · 1800 Silver tequila' },
         { name: 'Espresso Martini', price: '$24',
           pour: 'Fresh espresso crema · Mr Black cold brew, dark cacao · Haku vodka, demerara' },
@@ -124,12 +124,12 @@ const MENU = {
           { name: 'By the glass', desc: 'Ask the team.', noPrice: true },
         ] },
         { title: 'Beer', items: [
-          { name: 'Old Snow', cn: '老雪花', pinyin: 'Lǎo Xuě Huā', price: '$14',
+          { name: 'Old Snow', cn: '老雪花', pinyin: 'Lǎo Xuě Huā', price: '$14', softPrice: '$13',   // soft-opening price set by hand (4 Nov 2026)
             pour: 'Crisp malt, light floral, clean and refreshing',
             strength: '640ml sharing bottle' },
         ] },
         { title: 'Mocktail', items: [
-          { name: 'Made to your taste', price: '$10',
+          { name: 'Made to your taste', price: '$13',   // flat, no discount (was $10; 4 Nov 2026)
             desc: 'Tell us what you like and we’ll build it.',
             pour: 'Fresh fruit, citrus and botanicals · zero proof',
             noDiscount: true },   // still $10 flat; the label was removed (Robin, 4 Oct 2026)

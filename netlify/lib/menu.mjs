@@ -61,28 +61,28 @@ const MENU = {
           pour: 'Chrysanthemum house soda · hawthorn, jujube, goji · house four-fenjiu blend' },
         { num: '02', name: 'The Offering', cn: '敬山河', pinyin: 'Jìng Shān Hé', tag: 'The Ritual', price: '$26',
           desc: 'After the old custom of pouring a drink to the earth and sky.',
-          pour: 'Orange marmalade, bright citrus · chen pi brine, coriander, white pepper · cucumber, red fenjiu' },
+          pour: 'Orange marmalade, bright citrus · chen pi brine, coriander, white pepper · cucumber, Bofen' },   // "red fenjiu" is Bofen (玻汾); call it Bofen (Robin, 5 Nov 2026)
         { num: '03', name: 'Live Long', cn: '长生', pinyin: 'Cháng Shēng', tag: 'The Awakening', price: '$26',
           desc: 'The first half of a blessing, built to wake the palate.',
-          pour: 'White peach, fresh floral · earthy oolong, warming ginger, Hennessy VS · fenjiu Panama, vanilla oak, citrus',
+          pour: 'White peach, fresh floral · earthy oolong, warming ginger, Hennessy VS · Panama 42% fenjiu, vanilla oak, citrus',   // Panama 42% (Robin, 5 Nov 2026)
           strength: 'Contains dairy' },   // milk-clarified; the clear drink still carries milk traces
         { num: '04', name: 'Love Long', cn: '长情', pinyin: 'Cháng Qíng', tag: 'The Connection', price: '$28', softPrice: '$24',   // soft-opening price set by hand (4 Nov 2026)
           desc: 'The second half of that blessing, deep and lingering.',
           // No egg white (Robin, 4 Oct 2026; the recipe's "dry shake the egg white" step is an error).
-          pour: 'Red dragonfruit, soft floral · silken, tart ruby hibiscus · sloe gin, blue fenjiu, botanicals' },
+          pour: 'Red dragonfruit, soft floral · silken, tart ruby hibiscus · sloe gin, Silk Road fenjiu, botanicals' },   // Silk Road, not "blue" (Rohan, 5 Nov 2026)
         { num: '05', name: 'Wongka', cn: '花样年华', pinyin: 'Huāyàng Niánhuá', tag: 'The Secret Recipe', price: '$28', softPrice: '$24',   // soft-opening price set by hand (4 Nov 2026)
           desc: 'A slow-burning tribute to fleeting time, anchored by roasted cacao.',
           pour: 'Toasted cacao, smoke · soft spice, dark herbs · Panama black fenjiu 20 year, Punt e Mes' },
         { num: '06', name: 'Violet Haze', cn: '紫烟', pinyin: 'Zǐ Yān', tag: 'The Atmosphere', price: '$29',
           desc: 'Ink-wash painting meeting late-night neon.',
-          pour: 'Floral, lemon myrtle · violette, Lillet Blanc · Panama fenjiu 20 year' },
+          pour: 'Floral, lemon myrtle · violette, Lillet Blanc · Panama 42% fenjiu' },   // Panama 42% (Robin, 5 Nov 2026)
         { num: '07', name: 'Floating Fields', cn: '云野', pinyin: 'Yún Yě', tag: 'The Escape', price: '$28', softPrice: '$24',   // soft-opening price set by hand (4 Nov 2026)
           desc: 'A weightless pause before the night closes.',
           pour: 'Green tea, roasted rice · velvet matcha cream · Silk Road fenjiu, grain',   // no yuzu for now (Robin, 4 Oct)
           strength: 'Contains dairy' },
         { num: '08', name: 'Sweet Home', cn: '故里', pinyin: 'Gù Lǐ', tag: 'The Reunion', price: '$26',
           desc: 'After tangyuan, the sweet rice balls eaten for family and harmony.',
-          pour: 'Creamy coconut · black sesame, glutinous rice · rose fenjiu',
+          pour: 'Creamy coconut · black sesame, glutinous rice · rose fenjiu, Bofen',   // rose + red, and red is Bofen (Robin, 5 Nov 2026)
           strength: 'Contains sesame' },
       ],
     },
